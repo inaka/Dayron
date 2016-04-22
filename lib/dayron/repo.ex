@@ -2,8 +2,12 @@ defmodule Dayron.Repo do
   @moduledoc """
   Defines a rest repository.
 
+<<<<<<< HEAD
   A repository maps to an underlying http client, which send requests to a
   remote server. Currently the only available client is HTTPoison with hackney.
+=======
+  A repository maps to an underlying http client, which send requests to a remote server. Currently the only available client is HTTPoison with hackney.
+>>>>>>> extracting code from a working project, renaming to dayron
 
   When used, the repository expects the `:otp_app` as option.
   The `:otp_app` should point to an OTP application that has
