@@ -15,7 +15,7 @@ defmodule Dayron.Repo do
 
   Could be configured with:
 
-      config :my_app, Dayron,
+      config :my_app, MyApp.Dayron,
         url: "https://api.example.com",
         headers: [access_token: "token"]
 
