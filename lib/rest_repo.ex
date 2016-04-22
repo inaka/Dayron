@@ -1,0 +1,2 @@
+defmodule RestRepo do
+end
