@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure for your application as:
 #
-#     config :rest_repo, key: :value
+#     config :dayron, key: :value
 #
 # And access this configuration in your application as:
 #
-#     Application.get_env(:rest_repo, :key)
+#     Application.get_env(:dayron, :key)
 #
 # Or configure a 3rd-party app:
 #

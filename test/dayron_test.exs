@@ -1,6 +1,6 @@
-defmodule RestRepoTest do
+defmodule DayronTest do
   use ExUnit.Case
-  doctest RestRepo
+  doctest Dayron
 
   test "the truth" do
     assert 1 + 1 == 2
