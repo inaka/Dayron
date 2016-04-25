@@ -2,7 +2,8 @@ defmodule Dayron.Repo do
   @moduledoc """
   Defines a rest repository.
 
-  A repository maps to an underlying http client, which send requests to a remote server. Currently the only available client is HTTPoison with hackney.
+  A repository maps to an underlying http client, which send requests to a
+  remote server. Currently the only available client is HTTPoison with hackney.
 
   When used, the repository expects the `:otp_app` as option.
   The `:otp_app` should point to an OTP application that has
@@ -46,7 +47,7 @@ defmodule Dayron.Repo do
         Client.start
         url = request_url(model, id: id)
         case Client.get(url, headers, opts) do
-          {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> 
+          {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
             Model.from_json(model, body)
           {:ok, %HTTPoison.Response{status_code: 404}} -> nil
           # TODO: log all requests, specially error messages

@@ -1,4 +1,9 @@
 defmodule Dayron.Client do
+  @moduledoc """
+  A generic client created around HTTPoison.Base to wrap http requests to the
+  external api. It also automatically decodes the api response into a Map
+  converting all keys to atoms.
+  """
   require Crutches
   use HTTPoison.Base
 
