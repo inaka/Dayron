@@ -5,6 +5,7 @@ defmodule Dayron.Client do
   converting all keys to atoms.
   """
   require Crutches
+  require Poison
   use HTTPoison.Base
 
   def process_response_body(_body = ""), do: nil
