@@ -1,5 +1,5 @@
 defmodule Dayron.ConfigTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias Dayron.Config
 
   setup do

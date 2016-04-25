@@ -45,7 +45,7 @@ defmodule Dayron.Model do
       @resource opts[:resource]
 
       def __resource__ do
-        @resource || __schema__(:source)
+        @resource || apply(__MODULE__, :__schema__, [:source])
       end
 
       def __url_for__([id: id]), do: "/#{__resource__}/#{id}"
