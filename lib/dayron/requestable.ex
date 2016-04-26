@@ -24,7 +24,7 @@ defimpl Dayron.Requestable, for: Atom do
 
   defp raise_protocol_exception(module) do
     message = if :code.is_loaded(module) do
-      "the given module is not a Rest.Model"
+      "the given module is not a Dayron.Model"
     else
       "the given module does not exist"
     end

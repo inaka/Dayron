@@ -45,7 +45,10 @@ defmodule Dayron.Model do
       @resource opts[:resource]
 
       def __resource__ do
-        @resource || __schema__(:source)
+        case @resource do
+          nil -> apply(__MODULE__, :__schema__, [:source])
+          resource -> resource
+        end
       end
 
       def __url_for__([id: id]), do: "/#{__resource__}/#{id}"

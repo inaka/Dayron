@@ -1,5 +1,8 @@
 %{"bunt": {:hex, :bunt, "0.1.5"},
+  "bypass": {:hex, :bypass, "0.5.1"},
   "certifi": {:hex, :certifi, "0.4.0"},
+  "cowboy": {:hex, :cowboy, "1.0.4"},
+  "cowlib": {:hex, :cowlib, "1.0.2"},
   "credo": {:hex, :credo, "0.3.13"},
   "crutches": {:hex, :crutches, "1.0.0"},
   "hackney": {:hex, :hackney, "1.6.0"},
@@ -7,4 +10,7 @@
   "idna": {:hex, :idna, "1.2.0"},
   "metrics": {:hex, :metrics, "1.0.1"},
   "mimerl": {:hex, :mimerl, "1.0.2"},
+  "plug": {:hex, :plug, "1.1.4"},
+  "poison": {:hex, :poison, "2.1.0"},
+  "ranch": {:hex, :ranch, "1.2.1"},
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0"}}

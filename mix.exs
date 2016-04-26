@@ -30,9 +30,11 @@ defmodule Dayron.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:httpoison, "~> 0.8.0"},
-      {:crutches,  "~> 1.0.0"},
-      {:credo, "~> 0.3", only: [:dev, :test]}
+      {:poison, "~> 2.0"},
+      {:httpoison,  "~> 0.8.0"},
+      {:crutches,   "~> 1.0.0"},
+      {:credo,      "~> 0.3",     only: [:dev, :test]},
+      {:bypass,     "~> 0.1",     only: :test}
     ]
   end
 end
