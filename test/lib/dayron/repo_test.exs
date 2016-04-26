@@ -1,30 +1,32 @@
-# defmodule Dayron.RepoTest do
-#   use ExUnit.Case, async: true
+defmodule Dayron.RepoTest do
+  use ExUnit.Case, async: true
+  require Dayron.TestRepo, as: TestRepo
   
-#   bypass = Bypass.open
-#   Application.put_env(:dayron, Dayron.RepoTest.MyRepo, [url: "http://localhost:#{bypass.port}"])
+  defmodule MyModel do
+    use Dayron.Model, resource: "resources"
 
-#   defmodule MyRepo do
-#     use Dayron.Repo, opt_app: :dayron
-#   end
+    defstruct name: "", age: 0
+  end
 
-#   defmodule MyModel do
-#     use Dayron.Model, resource: "resources"
+  test "get a valid resource" do
+    body = %{name: "Full Name", age: 30}
+    assert %MyModel{name: "Full Name", age: 30} = TestRepo.get(MyModel, "id", body: body)
+  end
 
-#     defstruct name: "", age: 0
-#   end
+  test "get nil for invalid resource" do
+    assert nil == TestRepo.get(MyModel, "invalid-id")
+  end
 
-#   setup do
-#     {:ok, bypass: bypass}    
-#   end
+  test "get nil for server error" do
+    assert nil == TestRepo.get(MyModel, "server-error")
+  end
 
-#   test "get a valid resource", %{bypass: bypass} do
-#     Bypass.expect bypass, fn conn ->
-#       assert "/resources/id" == conn.request_path
-#       assert "GET" == conn.method
-#       Plug.Conn.resp(conn, 200, ~s<{"name": "Full Name", "age": 30}>)
-#     end
-#     assert %MyModel{name: "Full Name", age: 30} = MyRepo.get(MyModel, "id")
-#   end
 
-# end
+  test "does not accept direct Dayron.Repo.get call" do
+    msg = ~r/Cannot call Dayron.Repo directly/
+    assert_raise RuntimeError, msg, fn ->
+      Dayron.Repo.get(MyModel, "id")
+    end
+  end
+
+end

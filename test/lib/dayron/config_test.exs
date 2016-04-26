@@ -10,8 +10,9 @@ defmodule Dayron.ConfigTest do
   end
 
   test "parses a valid config" do    
-    {otp_app, config} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
+    {otp_app, adapter, config} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
     assert otp_app == :dayron_test
+    assert adapter == Dayron.HTTPoisonAdapter
     assert config[:url] == "http://api.example.com"
     assert config[:headers] == [access_token: "token"]
   end

@@ -32,7 +32,7 @@ defmodule Dayron.Repo do
 
   """
   @cannot_call_directly_error """
-  cannot call Dayron.Repo directly. Instead implement your own Repo module
+  Cannot call Dayron.Repo directly. Instead implement your own Repo module 
   with: use Dayron.Repo, otp_app: :my_app
   """
 
@@ -42,10 +42,10 @@ defmodule Dayron.Repo do
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
 
-      {otp_app, config} = Config.parse(__MODULE__, opts)
+      {otp_app, adapter, config} = Config.parse(__MODULE__, opts)
       @otp_app otp_app
+      @adapter adapter
       @config  config
-      @adapter config[:adapter] || Dayron.HTTPoisonAdapter
       
       def get(model, id, opts \\ []) do
         Dayron.Repo.get(@adapter, model, id, opts, @config)

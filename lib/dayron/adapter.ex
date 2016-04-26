@@ -16,7 +16,8 @@ defmodule Dayron.Adapter do
   """
   require HTTPoison
 
-  @type http_response :: {atom, HTTPoison.Response.t}
+  @type headers :: [{binary, binary}] | %{binary => binary}
+  @type response :: {:ok, HTTPoison.Response.t} | {:error, HTTPoison.Error.t}
 
-  @callback get(String.t, Keyword.t, Keyword.t) :: http_response
+  @callback get(binary, headers, Keyword.t) :: response
 end
