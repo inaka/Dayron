@@ -6,4 +6,6 @@ defmodule Dayron do
   @version Project.config[:version]
 
   def version, do: @version
+
+  def start(_, _), do: {:ok, self}
 end

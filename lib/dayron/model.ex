@@ -3,7 +3,7 @@ defmodule Dayron.Model do
   Defines the functions to convert a module into a Dayron Model.
 
   Given an module with Ecto.Schema included, the macro will include everything
-  required for Dayson.Repo and Dayson.Client to get and send data to the
+  required for Dayron.Repo and Dayron.Client to get and send data to the
   external Rest Api. The Schema definition is required to convert the api
   response json to a valid struct, mapping the json attributes to fields.
 

@@ -2,6 +2,7 @@ defmodule Dayron.Config do
   @moduledoc """
   Helpers to handle application configuration values.
   """
+  alias Dayron.Model
 
   @doc """
   Parses the OTP configuration for compilation time.
@@ -17,5 +18,13 @@ defmodule Dayron.Config do
     end
 
     {otp_app, config}
+  end
+
+  def get_request_url(config, model, opts) do
+    config[:url] <> Model.url_for(model, opts)
+  end
+
+  def get_headers(config) do
+    Keyword.get(config, :headers, [])
   end
 end
