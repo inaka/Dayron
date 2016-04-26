@@ -1,4 +1,43 @@
 defmodule Dayron.Model do
+  @moduledoc """
+  Defines the functions to convert a module into a Dayron Model.
+
+  Given an module with Ecto.Schema included, the macro will include everything
+  required for Dayson.Repo and Dayson.Client to get and send data to the
+  external Rest Api. The Schema definition is required to convert the api
+  response json to a valid struct, mapping the json attributes to fields.
+
+  ## Example
+
+      defmodule User do
+        use Ecto.Schema
+        use Dayron.Model
+
+        schema "users" do
+          field :name, :string
+          field :age, :integer, default: 0
+        end
+      end
+
+  By default the resource name is defined based on the schema source name, in
+  the above example "users", to api calls will be made to http://YOUR_API_URL/
+  users. In order to replace this, a :resource option is available.
+
+  ## Example
+
+      defmodule User do
+        use Ecto.Schema
+        use Dayron.Model, resource: "people"
+
+        schema "users" do
+          field :name, :string
+          field :age, :integer, default: 0
+        end
+      end
+
+  If some pre-processing is required to convert the json data into the struct,
+  it's possible to override __from_json__/2 into the module.
+  """
   alias Dayron.Requestable
 
   defmacro __using__(opts) do
@@ -8,7 +47,7 @@ defmodule Dayron.Model do
       def __resource__ do
         @resource || __schema__(:source)
       end
-      
+
       def __url_for__([id: id]), do: "/#{__resource__}/#{id}"
 
       def __url_for__([]), do: "/#{__resource__}"

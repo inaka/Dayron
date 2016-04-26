@@ -1,6 +1,10 @@
 defmodule Dayron.Config do
+  @moduledoc """
+  Helpers to handle application configuration values.
+  """
+
   @doc """
-  Parses the OTP configuration for compile time.
+  Parses the OTP configuration for compilation time.
   """
   def parse(repo, opts) do
     otp_app = Keyword.fetch!(opts, :otp_app)
