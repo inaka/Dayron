@@ -11,6 +11,7 @@ defmodule Dayron.HTTPoisonAdapter do
   @behaviour Dayron.Adapter
 
   defmodule Client do
+    @moduledoc false
     require Crutches
     require Poison
     use HTTPoison.Base
@@ -29,12 +30,11 @@ defmodule Dayron.HTTPoisonAdapter do
       Enum.into(headers, [
         {"Content-Type", "application/json"}
       ])
-    end  
+    end
   end
 
   def get(url, headers \\ [], opts \\ []) do
     Client.start
     Client.get(url, headers, opts)
   end
-  
 end

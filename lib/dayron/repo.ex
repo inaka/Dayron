@@ -32,23 +32,24 @@ defmodule Dayron.Repo do
 
   """
   @cannot_call_directly_error """
-  Cannot call Dayron.Repo directly. Instead implement your own Repo module 
+  Cannot call Dayron.Repo directly. Instead implement your own Repo module
   with: use Dayron.Repo, otp_app: :my_app
   """
 
   alias Dayron.Model
   alias Dayron.Config
-  
+
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
+      alias Dayron.Repo
 
       {otp_app, adapter, config} = Config.parse(__MODULE__, opts)
       @otp_app otp_app
       @adapter adapter
       @config  config
-      
+
       def get(model, id, opts \\ []) do
-        Dayron.Repo.get(@adapter, model, id, opts, @config)
+        Repo.get(@adapter, model, id, opts, @config)
       end
 
       # TBD
