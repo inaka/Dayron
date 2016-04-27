@@ -30,9 +30,14 @@ defmodule Dayron.ConfigTest do
   end
 
   test "returns a default adapter if nothing is config" do
-    {otp_app, adapter, config} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
+    {otp_app, adapter, _} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
     assert otp_app == :dayron_test
     assert adapter == Dayron.HTTPoisonAdapter
+  end
+
+  test "returns default value for log_responses?" do
+    {_, _, config} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
+    assert Config.log_responses?(config)
   end
 
   defmodule MyModel do

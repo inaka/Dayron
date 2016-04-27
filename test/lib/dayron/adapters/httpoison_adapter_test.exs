@@ -42,6 +42,16 @@ defmodule Dayron.HTTPoisonAdapterTest do
     assert {:ok, %HTTPoison.Response{status_code: 404, body: _}} = response
   end
 
+  test "returns a 500 error response", %{bypass: bypass, api_url: api_url} do
+    Bypass.expect bypass, fn conn ->
+      assert "/resources/server-error" == conn.request_path
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 500, "")
+    end
+    response = HTTPoisonAdapter.get("#{api_url}/resources/server-error")
+    assert {:ok, %HTTPoison.Response{status_code: 500, body: _}} = response
+  end
+
   test "returns an error for invalid server" do
     response = HTTPoisonAdapter.get("http://localhost:0001/resources/error")
     assert {:error, %HTTPoison.Error{reason: :econnrefused}} = response
