@@ -91,27 +91,17 @@ defmodule Dayron.Repo do
   end
 
   def get(adapter, model, id, opts, config) do
-    url = Config.get_request_url(config, model, id: id)
-    headers = Config.get_headers(config)
-    {_, response} = adapter.get(url, headers, opts)
-    if Config.log_responses?(config) do
-      ResponseLogger.log("GET", url, headers, opts, response)
-    end
+    {_, response} = get_response(adapter, model, [id: id], opts, config)
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         Model.from_json(model, body)
-      %HTTPoison.Response{status_code: code} when code > 300 -> nil
+      %HTTPoison.Response{status_code: code} when code >= 300 -> nil
       %HTTPoison.Error{reason: _reason} -> nil
     end
   end
 
   def get!(adapter, model, id, opts, config) do
-    url = Config.get_request_url(config, model, id: id)
-    headers = Config.get_headers(config)
-    {_, response} = adapter.get(url, headers, opts)
-    if Config.log_responses?(config) do
-      ResponseLogger.log("GET", url, headers, opts, response)
-    end
+    {url, response} = get_response(adapter, model, [id: id], opts, config)
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         Model.from_json(model, body)
@@ -119,23 +109,28 @@ defmodule Dayron.Repo do
         raise Dayron.NoResultsError, method: "GET", url: url
       %HTTPoison.Response{status_code: 500, body: body} ->
         raise Dayron.ServerError, method: "GET", url: url, body: body
-      %HTTPoison.Error{reason: reason} ->
+      %HTTPoison.Error{reason: reason} -> :ok
         raise Dayron.ClientError, method: "GET", url: url, reason: reason
     end
   end
 
   def all(adapter, model, opts, config) do
-    url = Config.get_request_url(config, model, opts)
-    headers = Config.get_headers(config)
-    {_, response} = adapter.get(url, headers, opts)
-    if Config.log_responses?(config) do
-      ResponseLogger.log("GET", url, headers, opts, response)
-    end
+    {_, response} = get_response(adapter, model, [], opts, config)
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         Model.from_json_list(model, body)
       %HTTPoison.Response{status_code: code} when code >= 300 -> nil
       %HTTPoison.Error{reason: _reason} -> nil
     end
+  end
+
+  defp get_response(adapter, model, url_opts, request_opts, config) do
+    url = Config.get_request_url(config, model, url_opts)
+    headers = Config.get_headers(config)
+    {_, response} = adapter.get(url, headers, request_opts)
+    if Config.log_responses?(config) do
+      ResponseLogger.log("GET", url, headers, request_opts, response)
+    end
+    {url, response}
   end
 end
