@@ -60,7 +60,7 @@ defmodule Dayron.Repo do
       end
 
       def all(model, opts \\ []) do
-        Repo.all!(@adapter, model, opts, @config)
+        Repo.all(@adapter, model, opts, @config)
       end
 
       # TBD
@@ -121,6 +121,21 @@ defmodule Dayron.Repo do
         raise Dayron.ServerError, method: "GET", url: url, body: body
       %HTTPoison.Error{reason: reason} ->
         raise Dayron.ClientError, method: "GET", url: url, reason: reason
+    end
+  end
+
+  def all(adapter, model, opts, config) do
+    url = Config.get_request_url(config, model, opts)
+    headers = Config.get_headers(config)
+    {_, response} = adapter.get(url, headers, opts)
+    if Config.log_responses?(config) do
+      ResponseLogger.log("GET", url, headers, opts, response)
+    end
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
+        Model.from_json_list(model, body)
+      %HTTPoison.Response{status_code: code} when code >= 300 -> nil
+      %HTTPoison.Error{reason: _reason} -> nil
     end
   end
 end

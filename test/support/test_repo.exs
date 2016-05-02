@@ -3,6 +3,10 @@ require HTTPoison
 defmodule Dayron.TestAdapter do
   @behaviour Dayron.Adapter
 
+  def get("http://localhost/resources", [], [body: body]) do
+    {:ok, %HTTPoison.Response{status_code: 200, body: body}}
+  end
+
   def get("http://localhost/resources/id", [], [body: body]) do
     {:ok, %HTTPoison.Response{status_code: 200, body: body}}
   end

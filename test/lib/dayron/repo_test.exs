@@ -68,4 +68,14 @@ defmodule Dayron.RepoTest do
     end
   end
 
+  test "get a list of valid resources" do
+    body = [
+      %{name: "First Resource", age: 30},
+      %{name: "Second Resource", age: 40}
+    ]
+    [first, second | _] = TestRepo.all(MyModel, [body: body])
+    assert %MyModel{name: "First Resource", age: 30} = first
+    assert %MyModel{name: "Second Resource", age: 40} = second
+  end
+
 end
