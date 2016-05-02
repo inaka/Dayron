@@ -7,6 +7,10 @@ defmodule Dayron.TestAdapter do
     {:ok, %HTTPoison.Response{status_code: 200, body: body}}
   end
 
+  def get("http://localhost/resources", [], [params: [{:q, "qu ery"}, {:page, 2}]]) do
+    {:ok, %HTTPoison.Response{status_code: 200, body: []}}
+  end
+
   def get("http://localhost/resources/id", [], [body: body]) do
     {:ok, %HTTPoison.Response{status_code: 200, body: body}}
   end

@@ -78,4 +78,9 @@ defmodule Dayron.RepoTest do
     assert %MyModel{name: "Second Resource", age: 40} = second
   end
 
+  test "get a list of resources with query params" do
+    params = [{:q, "qu ery"}, {:page, 2}]
+    assert [] = TestRepo.all(MyModel, params: params)
+  end
+
 end

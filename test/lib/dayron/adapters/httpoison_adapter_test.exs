@@ -46,6 +46,18 @@ defmodule Dayron.HTTPoisonAdapterTest do
     assert {:ok, %HTTPoison.Response{status_code: 200, body: _}} = response
   end
 
+  test "accepts query parameters", %{bypass: bypass, api_url: api_url} do
+    Bypass.expect bypass, fn conn ->
+      assert "/resources" == conn.request_path
+      assert "q=qu+ery&page=2" == conn.query_string
+      assert [{"content-type", "application/json"} | _] = conn.req_headers
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 200, "")
+    end
+    response = HTTPoisonAdapter.get("#{api_url}/resources", [], [params: [{:q, "qu ery"}, {:page, 2}]])
+    assert {:ok, %HTTPoison.Response{status_code: 200, body: _}} = response
+  end
+
   test "returns a 404 response", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/invalid" == conn.request_path
