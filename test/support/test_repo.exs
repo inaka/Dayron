@@ -11,6 +11,18 @@ defmodule Dayron.TestAdapter do
     {:ok, %HTTPoison.Response{status_code: 200, body: []}}
   end
 
+  def get("http://localhost/resources", [], [error: "server-error"]) do
+    {:ok, %HTTPoison.Response{status_code: 500, body: "Internal Exception..."}}
+  end
+
+  def get("http://localhost/resources", [], [error: "connection-error"]) do
+    {:error, %HTTPoison.Error{id: nil, reason: :econnrefused}}
+  end
+
+  def get("http://localhost/resources", [], [error: "timeout-error"]) do
+    {:error, %HTTPoison.Error{id: nil, reason: :connect_timeout}}
+  end
+
   def get("http://localhost/resources/id", [], [body: body]) do
     {:ok, %HTTPoison.Response{status_code: 200, body: body}}
   end
