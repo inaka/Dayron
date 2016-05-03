@@ -22,6 +22,8 @@ defmodule Dayron.Repo do
   The available configuration is:
 
     * `:url` - an URL that specifies the server api address
+    * `:adapter` - a module implementing Dayron.Adapter behaviour, default is
+    HTTPoisonAdapter
     * `:headers` - a keywords list with values to be sent on each request header
 
   URLs also support `{:system, "KEY"}` to be given, telling Dayron to load
@@ -38,6 +40,7 @@ defmodule Dayron.Repo do
 
   alias Dayron.Model
   alias Dayron.Config
+  alias Dayron.ResponseLogger
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
@@ -78,11 +81,12 @@ defmodule Dayron.Repo do
   def get(adapter, model, id, opts, config) do
     url = Config.get_request_url(config, model, id: id)
     headers = Config.get_headers(config)
-    case adapter.get(url, headers, opts) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+    {_, response} = adapter.get(url, headers, opts)
+    ResponseLogger.log("GET", url, headers, opts, response)
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
         Model.from_json(model, body)
-      {:ok, %HTTPoison.Response{status_code: 404}} -> nil
-      # TODO: log all requests, specially error messages
+      %HTTPoison.Response{status_code: 404} -> nil
       _error -> nil
     end
   end
