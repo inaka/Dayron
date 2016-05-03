@@ -55,11 +55,15 @@ defmodule Dayron.Repo do
         Repo.get(@adapter, model, id, opts, @config)
       end
 
+      def get!(model, id, opts \\ []) do
+        Repo.get!(@adapter, model, id, opts, @config)
+      end
+
+      def all(model, opts \\ []) do
+        Repo.all(@adapter, model, opts, @config)
+      end
+
       # TBD
-      def all(model, opts \\ []), do: nil
-
-      def get!(model, id, opts \\ []), do: nil
-
       def insert(model, opts \\ []), do: nil
 
       def update(model, opts \\ []), do: nil
@@ -78,16 +82,55 @@ defmodule Dayron.Repo do
     raise @cannot_call_directly_error
   end
 
+  def get!(_module, _id, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
+  def all(_module, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
   def get(adapter, model, id, opts, config) do
-    url = Config.get_request_url(config, model, id: id)
-    headers = Config.get_headers(config)
-    {_, response} = adapter.get(url, headers, opts)
-    ResponseLogger.log("GET", url, headers, opts, response)
+    {_, response} = get_response(adapter, model, [id: id], opts, config)
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         Model.from_json(model, body)
-      %HTTPoison.Response{status_code: 404} -> nil
-      _error -> nil
+      %HTTPoison.Response{status_code: code} when code >= 300 -> nil
+      %HTTPoison.Error{reason: _reason} -> nil
     end
+  end
+
+  def get!(adapter, model, id, opts, config) do
+    {url, response} = get_response(adapter, model, [id: id], opts, config)
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
+        Model.from_json(model, body)
+      %HTTPoison.Response{status_code: 404} ->
+        raise Dayron.NoResultsError, method: "GET", url: url
+      %HTTPoison.Response{status_code: 500, body: body} ->
+        raise Dayron.ServerError, method: "GET", url: url, body: body
+      %HTTPoison.Error{reason: reason} -> :ok
+        raise Dayron.ClientError, method: "GET", url: url, reason: reason
+    end
+  end
+
+  def all(adapter, model, opts, config) do
+    {_, response} = get_response(adapter, model, [], opts, config)
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
+        Model.from_json_list(model, body)
+      %HTTPoison.Response{status_code: code} when code >= 300 -> nil
+      %HTTPoison.Error{reason: _reason} -> nil
+    end
+  end
+
+  defp get_response(adapter, model, url_opts, request_opts, config) do
+    url = Config.get_request_url(config, model, url_opts)
+    headers = Config.get_headers(config)
+    {_, response} = adapter.get(url, headers, request_opts)
+    if Config.log_responses?(config) do
+      ResponseLogger.log("GET", url, headers, request_opts, response)
+    end
+    {url, response}
   end
 end

@@ -53,9 +53,15 @@ defmodule Dayron.Model do
 
       def __url_for__([id: id]), do: "/#{__resource__}/#{id}"
 
-      def __url_for__([]), do: "/#{__resource__}"
+      def __url_for__(_), do: "/#{__resource__}"
 
       def __from_json__(data, _opts), do: struct(__MODULE__, data)
+
+      def __from_json_list__(data, opts) when is_list(data) do
+        Enum.map(data, &__from_json__(&1, opts))
+      end
+
+      def __from_json_list__(data, _opts), do: struct(__MODULE__, data)
 
       defoverridable [__url_for__: 1, __from_json__: 2]
     end
@@ -67,5 +73,9 @@ defmodule Dayron.Model do
 
   def from_json(module, data, opts \\ []) do
     Requestable.from_json(module, data, opts)
+  end
+
+  def from_json_list(module, data, opts \\ []) do
+    Requestable.from_json_list(module, data, opts)
   end
 end

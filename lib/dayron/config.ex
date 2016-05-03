@@ -28,4 +28,8 @@ defmodule Dayron.Config do
   def get_headers(config) do
     Keyword.get(config, :headers, [])
   end
+
+  def log_responses?(config) do
+    Keyword.get(config, :enable_log, true)
+  end
 end

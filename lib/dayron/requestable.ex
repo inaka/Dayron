@@ -2,6 +2,8 @@ defprotocol Dayron.Requestable do
 
   def from_json(value, data, opts)
 
+  def from_json_list(value, data, opts)
+
   def url_for(value, opts)
 end
 
@@ -9,6 +11,14 @@ defimpl Dayron.Requestable, for: Atom do
   def from_json(module, data, opts) do
     try do
       module.__from_json__(data, opts)
+    rescue
+      UndefinedFunctionError -> raise_protocol_exception(module)
+    end
+  end
+
+  def from_json_list(module, data, opts) do
+    try do
+      module.__from_json_list__(data, opts)
     rescue
       UndefinedFunctionError -> raise_protocol_exception(module)
     end
