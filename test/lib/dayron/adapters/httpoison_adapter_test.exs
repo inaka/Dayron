@@ -1,6 +1,6 @@
-defmodule Dayron.ClientTest do
+defmodule Dayron.HTTPoisonAdapterTest do
   use ExUnit.Case, async: true
-  alias Dayron.Client
+  alias Dayron.HTTPoisonAdapter
 
   setup do
     bypass = Bypass.open
@@ -14,8 +14,7 @@ defmodule Dayron.ClientTest do
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"name": "Full Name", "address":{"street": "Elm Street", "zipcode": "88888"}}>)
     end
-    Client.start
-    response = Client.get("#{api_url}/resources/id")
+    response = HTTPoisonAdapter.get("#{api_url}/resources/id")
     assert {:ok, %HTTPoison.Response{status_code: 200, body: body}} = response
     assert body[:name] == "Full Name"
     assert body[:address] == %{street: "Elm Street", zipcode: "88888"}
@@ -29,8 +28,7 @@ defmodule Dayron.ClientTest do
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, "")
     end
-    Client.start
-    response = Client.get("#{api_url}/resources/id", [accesstoken: "token"])
+    response = HTTPoisonAdapter.get("#{api_url}/resources/id", [accesstoken: "token"])
     assert {:ok, %HTTPoison.Response{status_code: 200, body: _}} = response
   end
 
@@ -40,14 +38,12 @@ defmodule Dayron.ClientTest do
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 404, "")
     end
-    Client.start
-    response = Client.get("#{api_url}/resources/invalid")
+    response = HTTPoisonAdapter.get("#{api_url}/resources/invalid")
     assert {:ok, %HTTPoison.Response{status_code: 404, body: _}} = response
   end
 
   test "returns an error for invalid server" do
-    Client.start
-    response = Client.get("http://localhost:0001/resources/error")
+    response = HTTPoisonAdapter.get("http://localhost:0001/resources/error")
     assert {:error, %HTTPoison.Error{reason: :econnrefused}} = response
   end
 end
