@@ -67,14 +67,23 @@ defmodule Dayron.Model do
     end
   end
 
+  @doc """
+  A shortcut for Requestable.url_for/2
+  """
   def url_for(module, opts \\ []) do
     Requestable.url_for(module, opts)
   end
 
+  @doc """
+  A shortcut for Requestable.from_json/3
+  """
   def from_json(module, data, opts \\ []) do
     Requestable.from_json(module, data, opts)
   end
 
+  @doc """
+  A shortcut for Requestable.from_json_list/3
+  """
   def from_json_list(module, data, opts \\ []) do
     Requestable.from_json_list(module, data, opts)
   end

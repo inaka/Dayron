@@ -83,12 +83,14 @@ defmodule Dayron.Repo do
   end
 
   @doc """
-  Fetches a single model from the external api, building the request url based on the given model and id.
+  Fetches a single model from the external api, building the request url based
+  on the given model and id.
 
   Returns `nil` if no result was found or server reponds with an error.
   Returns a model struct with response values if valid.
 
-  Options are sent directly to the selected adapter. See Dayron.Adapter.get/3 for avaliable options.
+  Options are sent directly to the selected adapter. See Dayron.Adapter.get/3
+  for avaliable options.
   """
   def get(_module, _id, _opts \\ []) do
     raise @cannot_call_directly_error
@@ -108,12 +110,14 @@ defmodule Dayron.Repo do
   end
 
   @doc """
-  Fetches a list of models from the external api, building the request url based on the given model.
+  Fetches a list of models from the external api, building the request url
+  based on the given model.
 
   Returns an empty list if no result was found or server reponds with an error.
   Returns a list of model structs if response is valid.
 
-  Options are sent directly to the selected adapter. See Dayron.Adapter.get/3 for avaliable options.
+  Options are sent directly to the selected adapter. See Dayron.Adapter.get/3
+  for avaliable options.
   """
   def all(_module, _opts \\ []) do
     raise @cannot_call_directly_error
