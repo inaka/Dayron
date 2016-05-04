@@ -2,8 +2,8 @@ defmodule Dayron.Adapter do
   @moduledoc ~S"""
   Behaviour for creating Dayron Adapters
 
-  Adapters are wrappers around client libraries, responsible to send the HTTP
-  requests and parse the response code and body.
+  Adapters are wrappers around client libraries, responsible to send HTTP
+  requests and parse the response status and body.
 
   ## Example
 
