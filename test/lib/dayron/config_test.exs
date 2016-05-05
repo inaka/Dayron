@@ -29,6 +29,14 @@ defmodule Dayron.ConfigTest do
     end
   end
 
+  test "raises an exception if url is invalid in config" do
+    Application.put_env(:dayron_test, Dayron.Repo, [url: "invalid-url"])
+    msg = ~r/invalid URL for :url configuration in config :dayron_test/
+    assert_raise ArgumentError, msg, fn ->
+      Config.parse(Dayron.Repo, otp_app: :dayron_test)
+    end
+  end
+
   test "returns a default adapter if nothing is config" do
     {otp_app, adapter, _} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
     assert otp_app == :dayron_test
@@ -56,5 +64,13 @@ defmodule Dayron.ConfigTest do
     {_, _, config} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
     headers = Config.get_headers(config)
     assert headers[:access_token] == "token"
+  end
+
+  test "accepts url from a system env" do
+    System.put_env("API_URL", "http://stage-api.example.com")
+    Application.put_env(:dayron_test, Dayron.Repo, url: {:system, "API_URL"})
+    {_, _, config} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
+    url = Config.get_request_url(config, MyModel, id: 1)
+    assert url == "http://stage-api.example.com/resources/1"
   end
 end
