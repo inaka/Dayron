@@ -91,6 +91,10 @@ defmodule Dayron.RepoTest do
     assert [] == TestRepo.all(MyModel, [error: "connection-error"])
   end
 
+  test "`all!` returns empty list for timeout error" do
+    assert [] == TestRepo.all(MyModel, [error: "connection-error"])
+  end
+
   test "`all!` raises an exception on request error" do
     msg = ~r/Internal Exception/
     assert_raise Dayron.ServerError, msg, fn ->
@@ -98,11 +102,14 @@ defmodule Dayron.RepoTest do
     end
   end
 
-  test "`all!` raises an exception on timeout error" do
-    msg = ~r/connect_timeout/
-    assert_raise Dayron.ClientError, msg, fn ->
-      TestRepo.all!(MyModel, [error: "timeout-error"])
-    end
+  test "`all!` returns a list of valid resources" do
+    body = [
+      %{name: "First Resource", age: 30},
+      %{name: "Second Resource", age: 40}
+    ]
+    [first, second | _] = TestRepo.all!(MyModel, [body: body])
+    assert %MyModel{name: "First Resource", age: 30} = first
+    assert %MyModel{name: "Second Resource", age: 40} = second
   end
 
   test "`all!` raises an exception on connection error" do

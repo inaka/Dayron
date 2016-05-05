@@ -54,6 +54,10 @@ defmodule Dayron.Config do
     Keyword.get(config, :enable_log, true)
   end
 
+  @doc """
+  Parses the application configuration :url key, accepting system env or a
+  binary
+  """
   defp parse_url({:system, env}) when is_binary(env) do
     parse_url(System.get_env(env) || "")
   end
