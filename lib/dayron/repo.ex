@@ -63,6 +63,10 @@ defmodule Dayron.Repo do
         Repo.all(@adapter, model, opts, @config)
       end
 
+      def all!(model, opts \\ []) do
+        Repo.all!(@adapter, model, opts, @config)
+      end
+
       # TBD
       def insert(model, opts \\ []), do: nil
 
@@ -78,18 +82,61 @@ defmodule Dayron.Repo do
     end
   end
 
+  @doc """
+  Fetches a single model from the external api, building the request url based
+  on the given model and id.
+
+  Returns `nil` if no result was found or server reponds with an error.
+  Returns a model struct with response values if valid.
+
+  Options are sent directly to the selected adapter. See Dayron.Adapter.get/3
+  for avaliable options.
+  """
   def get(_module, _id, _opts \\ []) do
     raise @cannot_call_directly_error
   end
 
+  @doc """
+  Similar to `get/3` but raises excaptions for known errors:
+
+  ## Exceptions
+    * `Dayron.NoResultsError` - if server responds with a 404 not found.
+    * `Dayron.ServerError` - if server responds with a 500 internal error.
+    * `Dayron.ClientError` - for any error detected in client side, such as
+    timeout or connection errors.
+  """
   def get!(_module, _id, _opts \\ []) do
     raise @cannot_call_directly_error
   end
 
+  @doc """
+  Fetches a list of models from the external api, building the request url
+  based on the given model.
+
+  Returns an empty list if no result was found or server reponds with an error.
+  Returns a list of model structs if response is valid.
+
+  Options are sent directly to the selected adapter. See Dayron.Adapter.get/3
+  for avaliable options.
+  """
   def all(_module, _opts \\ []) do
     raise @cannot_call_directly_error
   end
 
+  @doc """
+  Similar to `all/2` but raises excaptions for known errors:
+
+  ## Exceptions
+    * `Dayron.NoResultsError` - if server responds with a 404 not found.
+    * `Dayron.ServerError` - if server responds with a 500 internal error.
+    * `Dayron.ClientError` - for any error detected in client side, such as
+    timeout or connection errors.
+  """
+  def all!(_module, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
+  @doc false
   def get(adapter, model, id, opts, config) do
     {_, response} = get_response(adapter, model, [id: id], opts, config)
     case response do
@@ -100,6 +147,7 @@ defmodule Dayron.Repo do
     end
   end
 
+  @doc false
   def get!(adapter, model, id, opts, config) do
     {url, response} = get_response(adapter, model, [id: id], opts, config)
     case response do
@@ -114,13 +162,27 @@ defmodule Dayron.Repo do
     end
   end
 
+  @doc false
   def all(adapter, model, opts, config) do
     {_, response} = get_response(adapter, model, [], opts, config)
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         Model.from_json_list(model, body)
-      %HTTPoison.Response{status_code: code} when code >= 300 -> nil
-      %HTTPoison.Error{reason: _reason} -> nil
+      %HTTPoison.Response{status_code: code} when code >= 300 -> []
+      %HTTPoison.Error{} -> []
+    end
+  end
+
+  @doc false
+  def all!(adapter, model, opts, config) do
+    {url, response} = get_response(adapter, model, [], opts, config)
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
+        Model.from_json_list(model, body)
+      %HTTPoison.Response{status_code: code, body: body} when code >= 300 ->
+        raise Dayron.ServerError, method: "GET", url: url, body: body
+      %HTTPoison.Error{reason: reason} ->
+        raise Dayron.ClientError, method: "GET", url: url, reason: reason
     end
   end
 

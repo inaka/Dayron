@@ -1,9 +1,24 @@
 defprotocol Dayron.Requestable do
-
+  @doc """
+  Given a json data for a single resource, returns a struct based on value/
+  module parameter
+  """
   def from_json(value, data, opts)
 
+  @doc """
+  Given a json data for multiple resources, returns a list of structs based on
+  value/module parameter
+  """
   def from_json_list(value, data, opts)
 
+  @doc """
+  Returns the url path representing the value/model and the options
+
+  ## Example
+
+      > Dayron.Requestable.url_for(MyModel, [id: id])
+      "/mymodels/id"
+  """
   def url_for(value, opts)
 end
 

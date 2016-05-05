@@ -11,7 +11,11 @@ defmodule Dayron.HTTPoisonAdapter do
   @behaviour Dayron.Adapter
 
   defmodule Client do
-    @moduledoc false
+    @moduledoc """
+    A HTTPoison.Base Client implementation, sending json requests, parsing
+    json responses to Maps or a List of Maps. Maps keys are also converted to
+    atoms by default.
+    """
     require Crutches
     require Poison
     use HTTPoison.Base
@@ -32,7 +36,9 @@ defmodule Dayron.HTTPoisonAdapter do
       |> Crutches.Map.dkeys_update(fn (key) -> String.to_atom(key) end)
     end
 
-    # HEADERS
+    @doc """
+    Merges headers received as argument with default headers
+    """
     defp process_request_headers(headers) when is_list(headers) do
       Enum.into(headers, [
         {"Content-Type", "application/json"}
@@ -40,6 +46,9 @@ defmodule Dayron.HTTPoisonAdapter do
     end
   end
 
+  @doc """
+  Implementation for `Dayron.Adapter.get/3`.
+  """
   def get(url, headers \\ [], opts \\ []) do
     Client.start
     Client.get(url, headers, opts)
