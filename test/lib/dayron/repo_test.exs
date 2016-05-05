@@ -68,7 +68,7 @@ defmodule Dayron.RepoTest do
     end
   end
 
-  test "get a list of valid resources" do
+  test "`all` returns a list of valid resources" do
     body = [
       %{name: "First Resource", age: 30},
       %{name: "Second Resource", age: 40}
@@ -78,9 +78,38 @@ defmodule Dayron.RepoTest do
     assert %MyModel{name: "Second Resource", age: 40} = second
   end
 
-  test "get a list of resources with query params" do
+  test "`all` returns a list of resources with query params" do
     params = [{:q, "qu ery"}, {:page, 2}]
     assert [] = TestRepo.all(MyModel, params: params)
+  end
+
+  test "`all` resturns empty list for server error" do
+    assert [] == TestRepo.all(MyModel, [error: "server-error"])
+  end
+
+  test "`all` returns empty list for timeout error" do
+    assert [] == TestRepo.all(MyModel, [error: "connection-error"])
+  end
+
+  test "`all!` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.all!(MyModel, [error: "server-error"])
+    end
+  end
+
+  test "`all!` raises an exception on timeout error" do
+    msg = ~r/connect_timeout/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.all!(MyModel, [error: "timeout-error"])
+    end
+  end
+
+  test "`all!` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.all!(MyModel, [error: "connection-error"])
+    end
   end
 
 end

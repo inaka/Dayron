@@ -26,14 +26,30 @@ defmodule Dayron.Config do
     {otp_app, adapter, config}
   end
 
+  @doc """
+  Given a config map, model and options, returns the complete url for the api
+  request.
+
+  ## Example
+
+      > Config.get_request_url(config, MyModel, [id: id])
+      "http://api.example.com/mymodels/id"
+  """
   def get_request_url(config, model, opts) do
     config[:url] <> Model.url_for(model, opts)
   end
 
+  @doc """
+  Returns the headers list set on application config
+  """
   def get_headers(config) do
     Keyword.get(config, :headers, [])
   end
 
+  @doc """
+  Based on application configuration, returns a boolean indicating if reponses
+  log is enabled
+  """
   def log_responses?(config) do
     Keyword.get(config, :enable_log, true)
   end
