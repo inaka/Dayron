@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/inaka/Dayron/badge.svg?branch=master)](https://coveralls.io/github/inaka/Dayron?branch=master)
 [![Twitter](https://img.shields.io/badge/twitter-@inaka-blue.svg?style=flat)](http://twitter.com/inaka)
 
-Dayron is a flexible library to interact with resources from REST APIs and map them to models in Elixir. It works _similar_ to [Ecto.Repo](https://github.com/elixir-lang/ecto) but, instead of retrieving data from a database, it has underlying http clients to retrieve data from external HTTP servers.
+Dayron is a flexible library to interact with resources from REST APIs and map them to models in Elixir. It works _similar_ of [Ecto.Repo](https://github.com/elixir-lang/ecto) but, instead of retrieving data from a database, it has underlying http clients to retrieve data from external HTTP servers.
 
 ## Installation
 

@@ -20,6 +20,8 @@ defmodule Dayron.HTTPoisonAdapter do
     require Poison
     use HTTPoison.Base
 
+    def process_request_body(body), do: Poison.encode!(body)
+
     def process_response_body(_body = ""), do: nil
 
     def process_response_body(body) do
@@ -39,9 +41,10 @@ defmodule Dayron.HTTPoisonAdapter do
     @doc """
     Merges headers received as argument with default headers
     """
-    defp process_request_headers(headers) when is_list(headers) do
+    def process_request_headers(headers) when is_list(headers) do
       Enum.into(headers, [
-        {"Content-Type", "application/json"}
+        {"Content-Type", "application/json"},
+        {"Accept", "application/json"},
       ])
     end
   end
@@ -52,5 +55,13 @@ defmodule Dayron.HTTPoisonAdapter do
   def get(url, headers \\ [], opts \\ []) do
     Client.start
     Client.get(url, headers, opts)
+  end
+
+  @doc """
+  Implementation for `Dayron.Adapter.post/4`.
+  """
+  def post(url, body, headers \\ [], opts \\ []) do
+    Client.start
+    Client.post(url, body, headers, opts)
   end
 end

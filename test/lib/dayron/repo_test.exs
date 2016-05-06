@@ -8,6 +8,7 @@ defmodule Dayron.RepoTest do
     defstruct name: "", age: 0
   end
 
+  # ================ GET ===========================
   test "get a valid resource" do
     body = %{name: "Full Name", age: 30}
     assert %MyModel{name: "Full Name", age: 30} = TestRepo.get(MyModel, "id", body: body)
@@ -36,6 +37,7 @@ defmodule Dayron.RepoTest do
     end
   end
 
+  # ================ GET! ===========================
   test "get! a valid resource" do
     body = %{name: "Full Name", age: 30}
     assert %MyModel{name: "Full Name", age: 30} = TestRepo.get!(MyModel, "id", body: body)
@@ -68,6 +70,7 @@ defmodule Dayron.RepoTest do
     end
   end
 
+  # ================ ALL ===========================
   test "`all` returns a list of valid resources" do
     body = [
       %{name: "First Resource", age: 30},
@@ -91,6 +94,17 @@ defmodule Dayron.RepoTest do
     assert [] == TestRepo.all(MyModel, [error: "connection-error"])
   end
 
+  # ================ ALL! ===========================
+  test "`all!` returns a list of valid resources" do
+    body = [
+      %{name: "First Resource", age: 30},
+      %{name: "Second Resource", age: 40}
+    ]
+    [first, second | _] = TestRepo.all!(MyModel, [body: body])
+    assert %MyModel{name: "First Resource", age: 30} = first
+    assert %MyModel{name: "Second Resource", age: 40} = second
+  end
+
   test "`all!` returns empty list for timeout error" do
     assert [] == TestRepo.all(MyModel, [error: "connection-error"])
   end
@@ -102,16 +116,6 @@ defmodule Dayron.RepoTest do
     end
   end
 
-  test "`all!` returns a list of valid resources" do
-    body = [
-      %{name: "First Resource", age: 30},
-      %{name: "Second Resource", age: 40}
-    ]
-    [first, second | _] = TestRepo.all!(MyModel, [body: body])
-    assert %MyModel{name: "First Resource", age: 30} = first
-    assert %MyModel{name: "Second Resource", age: 40} = second
-  end
-
   test "`all!` raises an exception on connection error" do
     msg = ~r/econnrefused/
     assert_raise Dayron.ClientError, msg, fn ->
@@ -119,4 +123,22 @@ defmodule Dayron.RepoTest do
     end
   end
 
+  # ================ INSERT ===========================
+  test "`insert` creates a valid resource from a model" do
+    data = %{name: "Full Name", age: 30}
+    {:ok, %MyModel{} = model} = TestRepo.insert(MyModel, data)
+    assert model.id == "new-model-id"
+  end
+
+  test "`insert` fails when creating a resource from an invalid model" do
+    
+  end
+
+  test "`insert` creates a valid resource from a changeset" do
+
+  end
+
+  test "`insert` fails when creating a resource from an invalid changeset" do
+    
+  end
 end

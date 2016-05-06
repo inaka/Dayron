@@ -58,15 +58,15 @@ defmodule Dayron.Config do
   Parses the application configuration :url key, accepting system env or a
   binary
   """
-  defp parse_url({:system, env}) when is_binary(env) do
+  def parse_url({:system, env}) when is_binary(env) do
     parse_url(System.get_env(env) || "")
   end
 
-  defp parse_url(url) when is_binary(url) do
+  def parse_url(url) when is_binary(url) do
     info = url |> URI.decode() |> URI.parse()
 
     if is_nil(info.host), do: {:error, :invalid_url}, else: {:ok, url}
   end
 
-  defp parse_url(_), do: {:error, :missing_url}
+  def parse_url(_), do: {:error, :missing_url}
 end

@@ -10,7 +10,7 @@ defmodule Dayron.HTTPoisonAdapterTest do
   test "returns a decoded body for a valid get request", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      assert [{"content-type", "application/json"} | _] = conn.req_headers
+      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"name": "Full Name", "address":{"street": "Elm Street", "zipcode": "88888"}}>)
     end
@@ -23,7 +23,7 @@ defmodule Dayron.HTTPoisonAdapterTest do
   test "returns a decoded body for a response list", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
-      assert [{"content-type", "application/json"} | _] = conn.req_headers
+      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<[{"name": "First Resource"}, {"name": "Second Resource"}]>)
     end
@@ -37,8 +37,9 @@ defmodule Dayron.HTTPoisonAdapterTest do
   test "accepts custom headers", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      assert [{"content-type", "application/json"} | _] = conn.req_headers
-      assert [_a, _b, {"accesstoken", "token"} | _] = conn.req_headers
+      IO.inspect {:req_headers, conn.req_headers}
+      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
+      assert [_a, _b, _c, {"accesstoken", "token"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, "")
     end
@@ -50,7 +51,7 @@ defmodule Dayron.HTTPoisonAdapterTest do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
       assert "q=qu+ery&page=2" == conn.query_string
-      assert [{"content-type", "application/json"} | _] = conn.req_headers
+      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, "")
     end

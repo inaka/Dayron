@@ -35,13 +35,16 @@ defmodule Dayron.TestAdapter do
     {:ok, %HTTPoison.Response{status_code: 500, body: "Internal Exception..."}}
   end
 
-
   def get("http://localhost/resources/connection-error", [], []) do
     {:error, %HTTPoison.Error{id: nil, reason: :econnrefused}}
   end
 
   def get("http://localhost/resources/timeout-error", [], []) do
     {:error, %HTTPoison.Error{id: nil, reason: :connect_timeout}}
+  end
+
+  def post("http://localhost/resources", model, [], []) do
+    {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(model)}}
   end
 
   %HTTPoison.Error{reason: :connect_timeout}

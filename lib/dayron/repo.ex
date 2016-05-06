@@ -9,13 +9,13 @@ defmodule Dayron.Repo do
   The `:otp_app` should point to an OTP application that has
   the repository configuration. For example, the repository:
 
-      defmodule MyApp.Dayron do
+      defmodule MyApp.RestRepo do
         use Dayron.Repo, otp_app: :my_app
       end
 
   Could be configured with:
 
-      config :my_app, MyApp.Dayron,
+      config :my_app, MyApp.RestRepo,
         url: "https://api.example.com",
         headers: [access_token: "token"]
 
@@ -29,7 +29,7 @@ defmodule Dayron.Repo do
   URLs also support `{:system, "KEY"}` to be given, telling Dayron to load
   the configuration from the system environment instead:
 
-      config :my_app, Dayron,
+      config :my_app, MyApp.RestRepo,
         url: {:system, "API_URL"}
 
   """
@@ -67,14 +67,18 @@ defmodule Dayron.Repo do
         Repo.all!(@adapter, model, opts, @config)
       end
 
-      # TBD
-      def insert(model, opts \\ []), do: nil
+      def insert(model, data, opts \\ []) do
+        Repo.insert(@adapter, model, data, opts, @config)
+      end
 
+      def insert!(model, data, opts \\ []) do
+        Repo.insert!(@adapter, model, data, opts, @config)
+      end
+
+      # TBD
       def update(model, opts \\ []), do: nil
 
       def delete(model, opts \\ []), do: nil
-
-      def insert!(model, opts \\ []), do: nil
 
       def update!(model, opts \\ []), do: nil
 
@@ -89,7 +93,7 @@ defmodule Dayron.Repo do
   Returns `nil` if no result was found or server reponds with an error.
   Returns a model struct with response values if valid.
 
-  Options are sent directly to the selected adapter. See Dayron.Adapter.get/3
+  Options are sent directly to the selected adapter. See `Dayron.Adapter.get/3`
   for avaliable options.
   """
   def get(_module, _id, _opts \\ []) do
@@ -116,7 +120,7 @@ defmodule Dayron.Repo do
   Returns an empty list if no result was found or server reponds with an error.
   Returns a list of model structs if response is valid.
 
-  Options are sent directly to the selected adapter. See Dayron.Adapter.get/3
+  Options are sent directly to the selected adapter. See `Dayron.Adapter.get/3`
   for avaliable options.
   """
   def all(_module, _opts \\ []) do
@@ -133,6 +137,47 @@ defmodule Dayron.Repo do
     timeout or connection errors.
   """
   def all!(_module, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
+  @doc """
+  Inserts a model or an `Ecto.Changeset`.
+
+  In case a model is given, the model is converted into a changeset
+  with all model non-virtual fields as part of the changeset.
+  This conversion is done by calling `Ecto.Changeset.change/2` directly.
+
+  In case a changeset is given, the changes in the changeset are
+  merged with the model fields, and all of them are sent to the
+  database.
+
+  Options are sent directly to the selected adapter.
+  See Dayron.Adapter.insert/3 for avaliable options.
+
+  ## Example
+
+      case RestRepo.insert %User{name: "Dayse"} do
+        {:ok, model}        -> # Inserted with success
+        {:error, changeset} -> # Something went wrong
+      end
+
+  """
+  def insert(_module, _data, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
+  @doc """
+  Similar to `insert/3` but returns the model or raises if the changeset is
+  invalid.
+
+  ## Exceptions
+    * `Dayron.ValidationError` - if server responds with a 422 unprocessable 
+    entity.
+    * `Dayron.ServerError` - if server responds with a 500 internal error.
+    * `Dayron.ClientError` - for any error detected in client side, such as
+    timeout or connection errors.
+  """
+  def insert!(_module, _data, _opts \\ []) do
     raise @cannot_call_directly_error
   end
 
@@ -186,12 +231,47 @@ defmodule Dayron.Repo do
     end
   end
 
+  @doc false
+  def insert(adapter, model, data, opts, config) do
+    {url, response} = post_response(adapter, model, data, opts, config)
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
+        {:ok, Model.from_json(model, data)}
+      %HTTPoison.Response{status_code: 422} ->
+        # TODO: return a changeset with validation errors
+        {:error, model}
+      %HTTPoison.Response{status_code: code, body: body} when code >= 500 ->
+        raise Dayron.ServerError, method: "GET", url: url, body: body
+      %HTTPoison.Error{reason: reason} ->
+        raise Dayron.ClientError, method: "GET", url: url, reason: reason
+    end
+  end
+
+  def insert!(adapter, model, data, opts, config) do
+    case insert(adapter, model, data, opts, config) do
+      {:ok, model} -> model
+      {:error, changeset} ->
+        raise Dayron.ValidationError, action: :insert, changeset: changeset
+    end
+  end
+
   defp get_response(adapter, model, url_opts, request_opts, config) do
     url = Config.get_request_url(config, model, url_opts)
     headers = Config.get_headers(config)
     {_, response} = adapter.get(url, headers, request_opts)
     if Config.log_responses?(config) do
-      ResponseLogger.log("GET", url, headers, request_opts, response)
+      ResponseLogger.log("GET", url, response)
+    end
+    {url, response}
+  end
+
+  defp post_response(adapter, model, data, request_opts, config) do
+    url = Config.get_request_url(config, model, [])
+    headers = Config.get_headers(config)
+    {_, response} = adapter.post(url, data, headers, request_opts)
+    if Config.log_responses?(config) do
+      request_details = [body: model]
+      ResponseLogger.log("POST", url, response, request_details)
     end
     {url, response}
   end
