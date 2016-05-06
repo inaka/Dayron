@@ -1,7 +1,7 @@
 # Dayron
 
 [![Build Status](https://travis-ci.org/inaka/Dayron.svg?branch=master)](https://travis-ci.org/inaka/Dayron)
-[![Inline docs](http://inch-ci.org/github/inaka/Dayron.svg)](http://inch-ci.org/github/inaka/Dayron)
+[![Inline docs](https://inch-ci.org/github/inaka/Dayron.svg)](https://inch-ci.org/github/inaka/Dayron)
 [![Coverage Status](https://coveralls.io/repos/github/inaka/Dayron/badge.svg?branch=master)](https://coveralls.io/github/inaka/Dayron?branch=master)
 [![Twitter](https://img.shields.io/badge/twitter-@inaka-blue.svg?style=flat)](http://twitter.com/inaka)
 
