@@ -57,7 +57,7 @@ defmodule Dayron.Adapter do
   ## Arguments:
     * `url` - target url as a binary string or char list
     * `body` - request body. Usually a struct deriving `Poison.Encoder`
-    * `headers` - HTTP headers as an orddict 
+    * `headers` - HTTP headers as an orddict
       (e.g., `[{"Accept", "application/json"}]`)
     * `options` - Keyword list of options
 

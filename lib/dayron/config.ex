@@ -14,15 +14,14 @@ defmodule Dayron.Config do
 
     case parse_url(opts[:url] || config[:url]) do
       {:ok, url} -> config = Keyword.put(config, :url, url)
-      {:error, :missing_url} -> 
+      {:error, :missing_url} ->
         raise ArgumentError, "missing :url configuration in " <>
                              "config #{inspect otp_app}, #{inspect repo}"
-      
-      {:error, _} -> 
+      {:error, _} ->
         raise ArgumentError, "invalid URL for :url configuration in " <>
                              "config #{inspect otp_app}, #{inspect repo}"
     end
-    
+
     {otp_app, adapter, config}
   end
 

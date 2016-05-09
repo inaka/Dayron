@@ -102,7 +102,8 @@ defmodule Dayron.Repo do
   end
 
   @doc """
-  Similar to `get/3` but raises `Dayron.NoResultsError` if no resource is returned in the server response.
+  Similar to `get/3` but raises `Dayron.NoResultsError` if no resource is
+  returned in the server response.
   """
   def get!(_module, _id, _opts \\ []) do
     raise @cannot_call_directly_error
@@ -159,7 +160,8 @@ defmodule Dayron.Repo do
   end
 
   @doc """
-  Similar to `insert/3` but raises a `Dayron.ValidationError` if server responds with a 422 unprocessable entity.
+  Similar to `insert/3` but raises a `Dayron.ValidationError` if server
+  responds with a 422 unprocessable entity.
   """
   def insert!(_module, _data, _opts \\ []) do
     raise @cannot_call_directly_error
@@ -183,7 +185,7 @@ defmodule Dayron.Repo do
   @doc false
   def get!(adapter, model, id, opts, config) do
     case get(adapter, model, id, opts, config) do
-      nil -> 
+      nil ->
         url = Config.get_request_url(config, model, [id: id])
         raise Dayron.NoResultsError, method: "GET", url: url
       model -> model
