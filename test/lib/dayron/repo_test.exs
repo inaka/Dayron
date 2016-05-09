@@ -105,10 +105,6 @@ defmodule Dayron.RepoTest do
     assert %MyModel{name: "Second Resource", age: 40} = second
   end
 
-  test "`all!` returns empty list for timeout error" do
-    assert [] == TestRepo.all(MyModel, [error: "connection-error"])
-  end
-
   test "`all!` raises an exception on request error" do
     msg = ~r/Internal Exception/
     assert_raise Dayron.ServerError, msg, fn ->
@@ -132,8 +128,8 @@ defmodule Dayron.RepoTest do
 
   test "`insert` fails when creating a resource from an invalid model" do
     data = %{name: nil, age: 30}
-    {:error, errors} = TestRepo.insert(MyModel, data)
-    assert errors[:error] == "name is required"
+    {:error, %{method: "POST", response: response}} = TestRepo.insert(MyModel, data)
+    assert response[:error] == "name is required"
   end
 
   test "`insert` raises an exception on request error" do
@@ -147,6 +143,35 @@ defmodule Dayron.RepoTest do
     msg = ~r/econnrefused/
     assert_raise Dayron.ClientError, msg, fn ->
       TestRepo.insert(MyModel, %{error: "connection-error"})
+    end
+  end
+
+  # ================ INSERT! ===========================
+  test "`insert!` creates a valid resource from a model" do
+    data = %{name: "Full Name", age: 30}
+    {:ok, model = %MyModel{}} = TestRepo.insert!(MyModel, data)
+    assert model.id == "new-model-id"
+  end
+
+  test "`insert!` raises an exception when creating a resource from an invalid model" do
+    data = %{name: nil, age: 30}
+    msg = ~r/validation error/
+    assert_raise Dayron.ValidationError, msg, fn ->
+      TestRepo.insert!(MyModel, data)
+    end
+  end
+
+  test "`insert!` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.insert!(MyModel, %{error: "server-error"})
+    end
+  end
+
+  test "`insert!` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.insert!(MyModel, %{error: "connection-error"})
     end
   end
 end
