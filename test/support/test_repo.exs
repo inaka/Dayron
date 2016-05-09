@@ -43,8 +43,21 @@ defmodule Dayron.TestAdapter do
     {:error, %HTTPoison.Error{id: nil, reason: :connect_timeout}}
   end
 
+  def post("http://localhost/resources", %{error: "server-error"}, [], []) do
+    {:ok, %HTTPoison.Response{status_code: 500, body: "Internal Exception..."}}
+  end
+
+  def post("http://localhost/resources", %{error: "connection-error"}, [], []) do
+    {:error, %HTTPoison.Error{id: nil, reason: :econnrefused}}
+  end
+
+  def post("http://localhost/resources", %{name: nil}, [], []) do
+    {:ok, %HTTPoison.Response{status_code: 422, body: %{error: "name is required"}}}
+  end
+
   def post("http://localhost/resources", model, [], []) do
-    {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(model)}}
+    model = Map.put(model, :id, "new-model-id")
+    {:ok, %HTTPoison.Response{status_code: 201, body: model}}
   end
 
   %HTTPoison.Error{reason: :connect_timeout}

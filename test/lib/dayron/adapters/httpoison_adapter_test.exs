@@ -34,10 +34,22 @@ defmodule Dayron.HTTPoisonAdapterTest do
     assert second[:name] == "Second Resource"
   end
 
+  test "returns a decoded body for a valid post request", %{bypass: bypass, api_url: api_url} do
+    Bypass.expect bypass, fn conn ->
+      assert "/resources" == conn.request_path
+      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
+      assert "POST" == conn.method
+      Plug.Conn.resp(conn, 201, ~s<{"name": "Full Name", "age": 30}>)
+    end
+    response = HTTPoisonAdapter.post("#{api_url}/resources", %{name: "Full Name", age: 30})
+    assert {:ok, %HTTPoison.Response{status_code: 201, body: body}} = response
+    assert body[:name] == "Full Name"
+    assert body[:age] == 30
+  end
+
   test "accepts custom headers", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      IO.inspect {:req_headers, conn.req_headers}
       assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
       assert [_a, _b, _c, {"accesstoken", "token"} | _] = conn.req_headers
       assert "GET" == conn.method

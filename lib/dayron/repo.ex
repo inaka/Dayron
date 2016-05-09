@@ -235,11 +235,10 @@ defmodule Dayron.Repo do
   def insert(adapter, model, data, opts, config) do
     {url, response} = post_response(adapter, model, data, opts, config)
     case response do
-      %HTTPoison.Response{status_code: 200, body: body} ->
-        {:ok, Model.from_json(model, data)}
-      %HTTPoison.Response{status_code: 422} ->
-        # TODO: return a changeset with validation errors
-        {:error, model}
+      %HTTPoison.Response{status_code: 201, body: body} ->
+        {:ok, Model.from_json(model, body)}
+      %HTTPoison.Response{status_code: 422, body: body} ->
+        {:error, body}
       %HTTPoison.Response{status_code: code, body: body} when code >= 500 ->
         raise Dayron.ServerError, method: "GET", url: url, body: body
       %HTTPoison.Error{reason: reason} ->

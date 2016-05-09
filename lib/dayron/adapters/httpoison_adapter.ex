@@ -22,7 +22,8 @@ defmodule Dayron.HTTPoisonAdapter do
 
     def process_request_body(body), do: Poison.encode!(body)
 
-    def process_response_body(_body = ""), do: nil
+    def process_response_body(""), do: nil
+    def process_response_body("ok"), do: %{}
 
     def process_response_body(body) do
       body |> Poison.decode! |> process_decoded_body

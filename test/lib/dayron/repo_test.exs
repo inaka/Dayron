@@ -5,7 +5,7 @@ defmodule Dayron.RepoTest do
   defmodule MyModel do
     use Dayron.Model, resource: "resources"
 
-    defstruct name: "", age: 0
+    defstruct id: nil, name: "", age: 0
   end
 
   # ================ GET ===========================
@@ -131,14 +131,22 @@ defmodule Dayron.RepoTest do
   end
 
   test "`insert` fails when creating a resource from an invalid model" do
-    
+    data = %{name: nil, age: 30}
+    {:error, errors} = TestRepo.insert(MyModel, data)
+    assert errors[:error] == "name is required"
   end
 
-  test "`insert` creates a valid resource from a changeset" do
-
+  test "`insert` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.insert(MyModel, %{error: "server-error"})
+    end
   end
 
-  test "`insert` fails when creating a resource from an invalid changeset" do
-    
+  test "`insert` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.insert(MyModel, %{error: "connection-error"})
+    end
   end
 end
