@@ -192,4 +192,86 @@ defmodule Dayron.RepoTest do
       Dayron.Repo.insert!(MyModel, %{})
     end
   end
+
+  # ================ UPDATE ===========================
+  test "`update` a valid resource given model and data" do
+    data = %{name: "Full Name", age: 30}
+    {:ok, %MyModel{} = model} = TestRepo.update(MyModel, 'id', data)
+    assert model.id == "updated-model-id"
+  end
+
+  test "`update` a valid resource fails when data is invalid" do
+    data = %{name: nil, age: 30}
+    {:error, %{method: "PATCH", code: 422, response: response}} = TestRepo.update(MyModel, 'id', data)
+    assert response[:error] == "name is required"
+  end
+
+  test "`update` an invalid resource returns an error" do
+    data = %{name: "Full Name", age: 30}
+    {:error, %{method: "PATCH", code: 404}} = TestRepo.update(MyModel, 'invalid-id', data)
+  end
+
+  test "`update` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.update(MyModel, 'id', %{error: "server-error"})
+    end
+  end
+
+  test "`update` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.update(MyModel, 'id', %{error: "connection-error"})
+    end
+  end
+
+  test "`update` does not accept direct Dayron.Repo.update call" do
+    msg = ~r/Cannot call Dayron.Repo directly/
+    assert_raise RuntimeError, msg, fn ->
+      Dayron.Repo.update(MyModel, 'id', %{})
+    end
+  end
+
+  # ================ INSERT! ===========================
+  test "`update!` a valid resource given a model and data" do
+    data = %{name: "Full Name", age: 30}
+    {:ok, model = %MyModel{}} = TestRepo.update!(MyModel, 'id', data)
+    assert model.id == "updated-model-id"
+  end
+
+  test "`update!` raises an exception when data is an invalid model" do
+    data = %{name: nil, age: 30}
+    msg = ~r/validation error/
+    assert_raise Dayron.ValidationError, msg, fn ->
+      TestRepo.update!(MyModel, 'id', data)
+    end
+  end
+
+  test "`update!` raises an exception when id is invalid" do
+    data = %{name: "Full Name", age: 30}
+    assert_raise Dayron.NoResultsError, fn ->
+      TestRepo.update!(MyModel, 'invalid-id', data)
+    end
+  end
+
+  test "`update!` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.update!(MyModel, 'id', %{error: "server-error"})
+    end
+  end
+
+  test "`update!` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.update!(MyModel, 'id', %{error: "connection-error"})
+    end
+  end
+
+  test "`update!` does not accept direct Dayron.Repo.update! call" do
+    msg = ~r/Cannot call Dayron.Repo directly/
+    assert_raise RuntimeError, msg, fn ->
+      Dayron.Repo.update!(MyModel, 'id', %{})
+    end
+  end
 end

@@ -71,12 +71,16 @@ defmodule Dayron.Repo do
         Repo.insert!(@adapter, model, data, opts, @config)
       end
 
+      def update(model, id, data, opts \\ []) do
+        Repo.update(@adapter, model, id, data, opts, @config)
+      end
+
+      def update!(model, id, data, opts \\ []) do
+        Repo.update!(@adapter, model, id, data, opts, @config)
+      end
+
       # TBD
-      def update(model, opts \\ []), do: nil
-
       def delete(model, opts \\ []), do: nil
-
-      def update!(model, opts \\ []), do: nil
 
       def delete!(model, opts \\ []), do: nil
     end
@@ -129,15 +133,7 @@ defmodule Dayron.Repo do
   end
 
   @doc """
-  Inserts a model or an `Ecto.Changeset`.
-
-  In case a model is given, the model is converted into a changeset
-  with all model non-virtual fields as part of the changeset.
-  This conversion is done by calling `Ecto.Changeset.change/2` directly.
-
-  In case a changeset is given, the changes in the changeset are
-  merged with the model fields, and all of them are sent to the
-  database.
+  Inserts a model given a map with resource attributes.
 
   Options are sent directly to the selected adapter.
   See Dayron.Adapter.insert/3 for avaliable options.
@@ -149,9 +145,9 @@ defmodule Dayron.Repo do
 
   ## Example
 
-      case RestRepo.insert %User{name: "Dayse"} do
-        {:ok, model}        -> # Inserted with success
-        {:error, changeset} -> # Something went wrong
+      case RestRepo.insert User, %{name: "Dayse"} do
+        {:ok, model}    -> # Inserted with success
+        {:error, error} -> # Something went wrong
       end
 
   """
@@ -164,6 +160,39 @@ defmodule Dayron.Repo do
   responds with a 422 unprocessable entity.
   """
   def insert!(_module, _data, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
+  @doc """
+  Updates a model given an id and a map with resource attributes.
+
+  Options are sent directly to the selected adapter.
+  See Dayron.Adapter.insert/3 for avaliable options.
+
+  ## Possible Exceptions
+    * `Dayron.ServerError` - if server responds with a 500 internal error.
+    * `Dayron.ClientError` - for any error detected in client side, such as
+    timeout or connection errors.
+
+  ## Example
+
+      case RestRepo.update User, "user-id", %{name: "Dayse"} do
+        {:ok, model}    -> # Updated with success
+        {:error, error} -> # Something went wrong
+      end
+
+  """
+  def update(_module, _id, _data, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
+  @doc """
+  Similar to `insert/4` but raises:
+    * `Dayron.NoResultsError` - if server responds with 404 resource not found.
+    * `Dayron.ValidationError` - if server responds with 422 unprocessable
+      entity.
+  """
+  def update!(_module, _id, _data, _opts \\ []) do
     raise @cannot_call_directly_error
   end
 
@@ -220,10 +249,39 @@ defmodule Dayron.Repo do
     end
   end
 
+  @doc false
   def insert!(adapter, model, data, opts, config) do
     case insert(adapter, model, data, opts, config) do
       {:ok, model} -> {:ok, model}
       {:error, error} -> raise Dayron.ValidationError, Map.to_list(error)
+    end
+  end
+
+  @doc false
+  def update(adapter, model, id, data, opts, config) do
+    {url, response} = patch_response(adapter, model, [id: id], data, opts,
+                                     config)
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
+        {:ok, Model.from_json(model, body)}
+      %HTTPoison.Response{status_code: code, body: body}
+      when code >= 400 and code < 500 ->
+        {:error, %{method: "PATCH", code: code, url: url, response: body}}
+      %HTTPoison.Response{status_code: code, body: body} when code >= 500 ->
+        raise Dayron.ServerError, method: "PATCH", url: url, body: body
+      %HTTPoison.Error{reason: reason} ->
+        raise Dayron.ClientError, method: "PATCH", url: url, reason: reason
+    end
+  end
+
+  @doc false
+  def update!(adapter, model, id, data, opts, config) do
+    case update(adapter, model, id, data, opts, config) do
+      {:ok, model} -> {:ok, model}
+      {:error, %{code: 404} = error} ->
+        raise Dayron.NoResultsError, Map.to_list(error)
+      {:error, %{code: 422} = error} ->
+        raise Dayron.ValidationError, Map.to_list(error)
     end
   end
 
@@ -232,7 +290,8 @@ defmodule Dayron.Repo do
     headers = Config.get_headers(config)
     {_, response} = adapter.get(url, headers, request_opts)
     if Config.log_responses?(config) do
-      ResponseLogger.log("GET", url, response)
+      request_details = [params: url_opts]
+      ResponseLogger.log("GET", url, response, request_details)
     end
     {url, response}
   end
@@ -242,8 +301,19 @@ defmodule Dayron.Repo do
     headers = Config.get_headers(config)
     {_, response} = adapter.post(url, data, headers, request_opts)
     if Config.log_responses?(config) do
-      request_details = [body: model]
+      request_details = [body: data]
       ResponseLogger.log("POST", url, response, request_details)
+    end
+    {url, response}
+  end
+
+  defp patch_response(adapter, model, url_opts, data, request_opts, config) do
+    url = Config.get_request_url(config, model, url_opts)
+    headers = Config.get_headers(config)
+    {_, response} = adapter.patch(url, data, headers, request_opts)
+    if Config.log_responses?(config) do
+      request_details = [body: data]
+      ResponseLogger.log("PATCH", url, response, request_details)
     end
     {url, response}
   end

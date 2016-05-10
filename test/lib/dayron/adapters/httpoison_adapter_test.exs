@@ -47,6 +47,19 @@ defmodule Dayron.HTTPoisonAdapterTest do
     assert body[:age] == 30
   end
 
+  test "returns a decoded body for a valid patch request", %{bypass: bypass, api_url: api_url} do
+    Bypass.expect bypass, fn conn ->
+      assert "/resources/id" == conn.request_path
+      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
+      assert "PATCH" == conn.method
+      Plug.Conn.resp(conn, 200, ~s<{"name": "Full Name", "age": 30}>)
+    end
+    response = HTTPoisonAdapter.patch("#{api_url}/resources/id", %{name: "Full Name", age: 30})
+    assert {:ok, %HTTPoison.Response{status_code: 200, body: body}} = response
+    assert body[:name] == "Full Name"
+    assert body[:age] == 30
+  end
+
   test "accepts custom headers", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
