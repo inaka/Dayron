@@ -51,3 +51,23 @@ defmodule Dayron.ClientError do
     """
   end
 end
+
+
+defmodule Dayron.ValidationError do
+  @moduledoc """
+  Raised at runtime when the response is a 422 unprocessable entity.
+  """
+  defexception [:url, :method, :response]
+
+  def message(%{url: url, method: method, response: response}) do
+    """
+    validation error in request:
+
+    #{method} #{url}
+
+    * Response (422):
+
+    #{inspect response}
+    """
+  end
+end

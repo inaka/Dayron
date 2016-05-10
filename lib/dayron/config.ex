@@ -14,15 +14,14 @@ defmodule Dayron.Config do
 
     case parse_url(opts[:url] || config[:url]) do
       {:ok, url} -> config = Keyword.put(config, :url, url)
-      {:error, :missing_url} -> 
+      {:error, :missing_url} ->
         raise ArgumentError, "missing :url configuration in " <>
                              "config #{inspect otp_app}, #{inspect repo}"
-      
-      {:error, _} -> 
+      {:error, _} ->
         raise ArgumentError, "invalid URL for :url configuration in " <>
                              "config #{inspect otp_app}, #{inspect repo}"
     end
-    
+
     {otp_app, adapter, config}
   end
 
@@ -54,15 +53,19 @@ defmodule Dayron.Config do
     Keyword.get(config, :enable_log, true)
   end
 
-  defp parse_url({:system, env}) when is_binary(env) do
+  @doc """
+  Parses the application configuration :url key, accepting system env or a
+  binary
+  """
+  def parse_url({:system, env}) when is_binary(env) do
     parse_url(System.get_env(env) || "")
   end
 
-  defp parse_url(url) when is_binary(url) do
+  def parse_url(url) when is_binary(url) do
     info = url |> URI.decode() |> URI.parse()
 
     if is_nil(info.host), do: {:error, :invalid_url}, else: {:ok, url}
   end
 
-  defp parse_url(_), do: {:error, :missing_url}
+  def parse_url(_), do: {:error, :missing_url}
 end
