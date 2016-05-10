@@ -79,10 +79,13 @@ defmodule Dayron.Repo do
         Repo.update!(@adapter, model, id, data, opts, @config)
       end
 
-      # TBD
-      def delete(model, opts \\ []), do: nil
+      def delete(model, id, opts \\ []) do
+        Repo.delete(@adapter, model, id, opts, @config)
+      end
 
-      def delete!(model, opts \\ []), do: nil
+      def delete!(model, id, opts \\ []) do
+        Repo.delete!(@adapter, model, id, opts, @config)
+      end
     end
   end
 
@@ -196,6 +199,35 @@ defmodule Dayron.Repo do
     raise @cannot_call_directly_error
   end
 
+  @doc """
+  Deletes a resource given a model and id.
+
+  It returns `{:ok, model}` if the resource has been successfully
+  deleted or `{:error, error}` if there was a validation
+  or a known constraint error.
+
+  Options are sent directly to the selected adapter.
+  See `Dayron.Adapter.delete/3` for avaliable options.
+
+  ## Possible Exceptions
+    * `Dayron.ServerError` - if server responds with a 500 internal error.
+    * `Dayron.ClientError` - for any error detected in client side, such as
+    timeout or connection errors.
+  """
+  def delete(_module, _id, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
+  @doc """
+  Similar to `delete/3` but raises:
+    * `Dayron.NoResultsError` - if server responds with 404 resource not found.
+    * `Dayron.ValidationError` - if server responds with 422 unprocessable
+      entity.
+  """
+  def delete!(_module, _id, _opts \\ []) do
+    raise @cannot_call_directly_error
+  end
+
   @doc false
   def get(adapter, model, id, opts, config) do
     {url, response} = get_response(adapter, model, [id: id], opts, config)
@@ -285,6 +317,34 @@ defmodule Dayron.Repo do
     end
   end
 
+  @doc false
+  def delete(adapter, model, id, opts, config) do
+    {url, response} = delete_response(adapter, model, [id: id], opts, config)
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
+        {:ok, Model.from_json(model, body)}
+      %HTTPoison.Response{status_code: 204} -> {:ok, nil}
+      %HTTPoison.Response{status_code: code, body: body}
+      when code >= 400 and code < 500 ->
+        {:error, %{method: "DELETE", code: code, url: url, response: body}}
+      %HTTPoison.Response{status_code: code, body: body} when code >= 500 ->
+        raise Dayron.ServerError, method: "DELETE", url: url, body: body
+      %HTTPoison.Error{reason: reason} ->
+        raise Dayron.ClientError, method: "DELETE", url: url, reason: reason
+    end
+  end
+
+  @doc false
+  def delete!(adapter, model, id, opts, config) do
+    case delete(adapter, model, id, opts, config) do
+      {:ok, model} -> {:ok, model}
+      {:error, %{code: 404} = error} ->
+        raise Dayron.NoResultsError, Map.to_list(error)
+      {:error, %{code: 422} = error} ->
+        raise Dayron.ValidationError, Map.to_list(error)
+    end
+  end
+
   defp get_response(adapter, model, url_opts, request_opts, config) do
     url = Config.get_request_url(config, model, url_opts)
     headers = Config.get_headers(config)
@@ -314,6 +374,16 @@ defmodule Dayron.Repo do
     if Config.log_responses?(config) do
       request_details = [body: data]
       ResponseLogger.log("PATCH", url, response, request_details)
+    end
+    {url, response}
+  end
+
+  defp delete_response(adapter, model, url_opts, request_opts, config) do
+    url = Config.get_request_url(config, model, url_opts)
+    headers = Config.get_headers(config)
+    {_, response} = adapter.delete(url, headers, request_opts)
+    if Config.log_responses?(config) do
+      ResponseLogger.log("PATCH", url, response)
     end
     {url, response}
   end
