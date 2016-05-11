@@ -132,7 +132,7 @@ defmodule Dayron.RepoTest do
 
   test "`insert` fails when creating a resource from an invalid model" do
     data = %{name: nil, age: 30}
-    {:error, %{method: "POST", response: response}} = TestRepo.insert(MyModel, data)
+    {:error, %{method: :post, response: response}} = TestRepo.insert(MyModel, data)
     assert response[:error] == "name is required"
   end
 
@@ -190,6 +190,177 @@ defmodule Dayron.RepoTest do
     msg = ~r/Cannot call Dayron.Repo directly/
     assert_raise RuntimeError, msg, fn ->
       Dayron.Repo.insert!(MyModel, %{})
+    end
+  end
+
+  # ================ UPDATE ===========================
+  test "`update` a valid resource given model and data" do
+    data = %{name: "Full Name", age: 30}
+    {:ok, %MyModel{} = model} = TestRepo.update(MyModel, 'id', data)
+    assert model.id == "updated-model-id"
+  end
+
+  test "`update` a valid resource fails when data is invalid" do
+    data = %{name: nil, age: 30}
+    {:error, %{method: :patch, code: 422, response: response}} = TestRepo.update(MyModel, 'id', data)
+    assert response[:error] == "name is required"
+  end
+
+  test "`update` an invalid resource returns an error" do
+    data = %{name: "Full Name", age: 30}
+    assert {:error, %{method: :patch, code: 404}} = TestRepo.update(MyModel, 'invalid-id', data)
+  end
+
+  test "`update` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.update(MyModel, 'id', %{error: "server-error"})
+    end
+  end
+
+  test "`update` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.update(MyModel, 'id', %{error: "connection-error"})
+    end
+  end
+
+  test "`update` does not accept direct Dayron.Repo.update call" do
+    msg = ~r/Cannot call Dayron.Repo directly/
+    assert_raise RuntimeError, msg, fn ->
+      Dayron.Repo.update(MyModel, 'id', %{})
+    end
+  end
+
+  # ================ UPDATE! ===========================
+  test "`update!` a valid resource given a model and data" do
+    data = %{name: "Full Name", age: 30}
+    {:ok, model = %MyModel{}} = TestRepo.update!(MyModel, 'id', data)
+    assert model.id == "updated-model-id"
+  end
+
+  test "`update!` raises an exception when data is an invalid model" do
+    data = %{name: nil, age: 30}
+    msg = ~r/validation error/
+    assert_raise Dayron.ValidationError, msg, fn ->
+      TestRepo.update!(MyModel, 'id', data)
+    end
+  end
+
+  test "`update!` raises an exception when id is invalid" do
+    data = %{name: "Full Name", age: 30}
+    assert_raise Dayron.NoResultsError, fn ->
+      TestRepo.update!(MyModel, 'invalid-id', data)
+    end
+  end
+
+  test "`update!` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.update!(MyModel, 'id', %{error: "server-error"})
+    end
+  end
+
+  test "`update!` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.update!(MyModel, 'id', %{error: "connection-error"})
+    end
+  end
+
+  test "`update!` does not accept direct Dayron.Repo.update! call" do
+    msg = ~r/Cannot call Dayron.Repo directly/
+    assert_raise RuntimeError, msg, fn ->
+      Dayron.Repo.update!(MyModel, 'id', %{})
+    end
+  end
+
+  # ================ DELETE ===========================
+  test "`delete` a valid resource given model and id" do
+    {:ok, %MyModel{} = model} = TestRepo.delete(MyModel, 'id')
+    assert model.id == "deleted-model-id"
+  end
+
+  test "`delete` a valid resource fails when server returns 422" do
+    assert {:error, %{method: :delete, code: 422}} = TestRepo.delete(MyModel, 'validation-error-id')
+  end
+
+  test "`delete` an invalid resource returns an error" do
+    assert {:error, %{method: :delete, code: 404}} = TestRepo.delete(MyModel, 'invalid-id')
+  end
+
+  test "`delete` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.delete(MyModel, "server-error")
+    end
+  end
+
+  test "`delete` raises an exception on timeout error" do
+    msg = ~r/connect_timeout/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.delete(MyModel, "timeout-error")
+    end
+  end
+
+  test "`delete` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.delete(MyModel, "connection-error")
+    end
+  end
+
+  test "`delete` does not accept direct Dayron.Repo.delete call" do
+    msg = ~r/Cannot call Dayron.Repo directly/
+    assert_raise RuntimeError, msg, fn ->
+      Dayron.Repo.delete(MyModel, "id")
+    end
+  end
+
+  # ================ DELETE! ===========================
+  test "`delete!` a valid resource given a model and id" do
+    {:ok, model = %MyModel{}} = TestRepo.delete!(MyModel, 'id')
+    assert model.id == "deleted-model-id"
+  end
+
+  test "`delete!` raises an exception when data is an invalid model" do
+    msg = ~r/validation error/
+    assert_raise Dayron.ValidationError, msg, fn ->
+      TestRepo.delete!(MyModel, 'validation-error-id')
+    end
+  end
+
+  test "`delete!` raises an exception when id is invalid" do
+    assert_raise Dayron.NoResultsError, fn ->
+      TestRepo.delete!(MyModel, 'invalid-id')
+    end
+  end
+
+  test "`delete!` raises an exception on request error" do
+    msg = ~r/Internal Exception/
+    assert_raise Dayron.ServerError, msg, fn ->
+      TestRepo.delete!(MyModel, "server-error")
+    end
+  end
+
+  test "`delete!` raises an exception on timeout error" do
+    msg = ~r/connect_timeout/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.delete!(MyModel, "timeout-error")
+    end
+  end
+
+  test "`delete!` raises an exception on connection error" do
+    msg = ~r/econnrefused/
+    assert_raise Dayron.ClientError, msg, fn ->
+      TestRepo.delete!(MyModel, "connection-error")
+    end
+  end
+
+  test "`delete!` does not accept direct Dayron.Repo.delete! call" do
+    msg = ~r/Cannot call Dayron.Repo directly/
+    assert_raise RuntimeError, msg, fn ->
+      Dayron.Repo.delete!(MyModel, "id")
     end
   end
 end

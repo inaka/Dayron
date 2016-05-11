@@ -65,4 +65,20 @@ defmodule Dayron.HTTPoisonAdapter do
     Client.start
     Client.post(url, body, headers, opts)
   end
+
+  @doc """
+  Implementation for `Dayron.Adapter.patch/4`.
+  """
+  def patch(url, body, headers \\ [], opts \\ []) do
+    Client.start
+    Client.patch(url, body, headers, opts)
+  end
+
+  @doc """
+  Implementation for `Dayron.Adapter.delete/3`.
+  """
+  def delete(url, headers \\ [], opts \\ []) do
+    Client.start
+    Client.delete(url, headers, opts)
+  end
 end

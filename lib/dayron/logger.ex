@@ -1,4 +1,4 @@
-defmodule Dayron.ResponseLogger do
+defmodule Dayron.Logger do
   @moduledoc """
   Helper module wrapping Logger calls to register request/response events
   """
@@ -10,6 +10,7 @@ defmodule Dayron.ResponseLogger do
   """
   def log(method, url, response, req_details \\ []) do
     do_log(method, url, response, req_details)
+    response
   end
 
   @doc """

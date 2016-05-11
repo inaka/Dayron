@@ -51,7 +51,7 @@ defmodule Dayron.Model do
         end
       end
 
-      def __url_for__([id: id]), do: "/#{__resource__}/#{id}"
+      def __url_for__([{:id, id} | _]), do: "/#{__resource__}/#{id}"
 
       def __url_for__(_), do: "/#{__resource__}"
 
