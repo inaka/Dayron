@@ -40,7 +40,8 @@ defmodule Dayron.Repo do
 
   alias Dayron.Model
   alias Dayron.Config
-  alias Dayron.ResponseLogger
+  alias Dayron.Request
+  alias Dayron.Logger
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
@@ -72,11 +73,11 @@ defmodule Dayron.Repo do
       end
 
       def update(model, id, data, opts \\ []) do
-        Repo.update(@adapter, model, id, data, opts, @config)
+        Repo.update(@adapter, model, [id: id, body: data], opts, @config)
       end
 
       def update!(model, id, data, opts \\ []) do
-        Repo.update!(@adapter, model, id, data, opts, @config)
+        Repo.update!(@adapter, model, [id: id, body: data], opts, @config)
       end
 
       def delete(model, id, opts \\ []) do
@@ -230,54 +231,55 @@ defmodule Dayron.Repo do
 
   @doc false
   def get(adapter, model, id, opts, config) do
-    {url, response} = get_response(adapter, model, [id: id], opts, config)
+    {_request, response} = config
+      |> Config.init_request_data(:get, model, id: id)
+      |> execute!(adapter, opts, config)
+
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         Model.from_json(model, body)
       %HTTPoison.Response{status_code: code} when code >= 300 and code < 500 ->
         nil
-      %HTTPoison.Response{status_code: 500, body: body} ->
-        raise Dayron.ServerError, method: "GET", url: url, body: body
-      %HTTPoison.Error{reason: reason} -> :ok
-        raise Dayron.ClientError, method: "GET", url: url, reason: reason
     end
   end
 
   @doc false
   def get!(adapter, model, id, opts, config) do
-    case get(adapter, model, id, opts, config) do
-      nil ->
-        url = Config.get_request_url(config, model, [id: id])
-        raise Dayron.NoResultsError, method: "GET", url: url
-      model -> model
+    {request, response} = config
+      |> Config.init_request_data(:get, model, id: id)
+      |> execute!(adapter, opts, config)
+
+    case response do
+      %HTTPoison.Response{status_code: 200, body: body} ->
+        Model.from_json(model, body)
+      %HTTPoison.Response{status_code: code} when code >= 300 and code < 500 ->
+        raise Dayron.NoResultsError, method: request.method, url: request.url
     end
   end
 
   @doc false
   def all(adapter, model, opts, config) do
-    {url, response} = get_response(adapter, model, [], opts, config)
+    {_request, response} = config
+      |> Config.init_request_data(:get, model)
+      |> execute!(adapter, opts, config)
+
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         Model.from_json_list(model, body)
-      %HTTPoison.Response{status_code: code, body: body} when code >= 300 ->
-        raise Dayron.ServerError, method: "GET", url: url, body: body
-      %HTTPoison.Error{reason: reason} ->
-        raise Dayron.ClientError, method: "GET", url: url, reason: reason
     end
   end
 
   @doc false
   def insert(adapter, model, data, opts, config) do
-    {url, response} = post_response(adapter, model, data, opts, config)
+    {request, response} = config
+      |> Config.init_request_data(:post, model, body: data)
+      |> execute!(adapter, opts, config)
+
     case response do
       %HTTPoison.Response{status_code: 201, body: body} ->
         {:ok, Model.from_json(model, body)}
       %HTTPoison.Response{status_code: 422, body: body} ->
-        {:error, %{method: "POST", url: url, response: body}}
-      %HTTPoison.Response{status_code: code, body: body} when code >= 500 ->
-        raise Dayron.ServerError, method: "POST", url: url, body: body
-      %HTTPoison.Error{reason: reason} ->
-        raise Dayron.ClientError, method: "POST", url: url, reason: reason
+        {:error, %{method: request.method, url: request.url, response: body}}
     end
   end
 
@@ -290,25 +292,24 @@ defmodule Dayron.Repo do
   end
 
   @doc false
-  def update(adapter, model, id, data, opts, config) do
-    {url, response} = patch_response(adapter, model, [id: id], data, opts,
-                                     config)
+  def update(adapter, model, data, opts, config) do
+    {request, response} = config
+      |> Config.init_request_data(:patch, model, data)
+      |> execute!(adapter, opts, config)
+
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         {:ok, Model.from_json(model, body)}
       %HTTPoison.Response{status_code: code, body: body}
       when code >= 400 and code < 500 ->
-        {:error, %{method: "PATCH", code: code, url: url, response: body}}
-      %HTTPoison.Response{status_code: code, body: body} when code >= 500 ->
-        raise Dayron.ServerError, method: "PATCH", url: url, body: body
-      %HTTPoison.Error{reason: reason} ->
-        raise Dayron.ClientError, method: "PATCH", url: url, reason: reason
+        {:error, %{method: request.method, code: code, url: request.url,
+                   response: body}}
     end
   end
 
   @doc false
-  def update!(adapter, model, id, data, opts, config) do
-    case update(adapter, model, id, data, opts, config) do
+  def update!(adapter, model, data, opts, config) do
+    case update(adapter, model, data, opts, config) do
       {:ok, model} -> {:ok, model}
       {:error, %{code: 404} = error} ->
         raise Dayron.NoResultsError, Map.to_list(error)
@@ -319,18 +320,18 @@ defmodule Dayron.Repo do
 
   @doc false
   def delete(adapter, model, id, opts, config) do
-    {url, response} = delete_response(adapter, model, [id: id], opts, config)
+    {request, response} = config
+      |> Config.init_request_data(:delete, model, id: id)
+      |> execute!(adapter, opts, config)
+
     case response do
       %HTTPoison.Response{status_code: 200, body: body} ->
         {:ok, Model.from_json(model, body)}
       %HTTPoison.Response{status_code: 204} -> {:ok, nil}
       %HTTPoison.Response{status_code: code, body: body}
       when code >= 400 and code < 500 ->
-        {:error, %{method: "DELETE", code: code, url: url, response: body}}
-      %HTTPoison.Response{status_code: code, body: body} when code >= 500 ->
-        raise Dayron.ServerError, method: "DELETE", url: url, body: body
-      %HTTPoison.Error{reason: reason} ->
-        raise Dayron.ClientError, method: "DELETE", url: url, reason: reason
+        {:error, %{method: request.method, code: code, url: request.url,
+                   response: body}}
     end
   end
 
@@ -345,46 +346,29 @@ defmodule Dayron.Repo do
     end
   end
 
-  defp get_response(adapter, model, url_opts, request_opts, config) do
-    url = Config.get_request_url(config, model, url_opts)
-    headers = Config.get_headers(config)
-    {_, response} = adapter.get(url, headers, request_opts)
-    if Config.log_responses?(config) do
-      request_details = [params: url_opts]
-      ResponseLogger.log("GET", url, response, request_details)
-    end
-    {url, response}
+  defp execute!(%Request{} = request, adapter, opts, config) do
+    request
+    |> Request.send(adapter, opts)
+    |> handle_errors(opts)
+    |> log_response(config)
   end
 
-  defp post_response(adapter, model, data, request_opts, config) do
-    url = Config.get_request_url(config, model, [])
-    headers = Config.get_headers(config)
-    {_, response} = adapter.post(url, data, headers, request_opts)
-    if Config.log_responses?(config) do
-      request_details = [body: data]
-      ResponseLogger.log("POST", url, response, request_details)
+  defp handle_errors({request, response}, _opts) do
+    case response do
+      %HTTPoison.Response{status_code: 500, body: body} ->
+        raise Dayron.ServerError, method: request.method, url: request.url,
+                                  body: body
+      %HTTPoison.Error{reason: reason} -> :ok
+        raise Dayron.ClientError, method: request.method, url: request.url,
+                                  reason: reason
+      _ -> {request, response}
     end
-    {url, response}
   end
 
-  defp patch_response(adapter, model, url_opts, data, request_opts, config) do
-    url = Config.get_request_url(config, model, url_opts)
-    headers = Config.get_headers(config)
-    {_, response} = adapter.patch(url, data, headers, request_opts)
+  defp log_response({request, response}, config) do
     if Config.log_responses?(config) do
-      request_details = [body: data]
-      ResponseLogger.log("PATCH", url, response, request_details)
+      Logger.log(request.method, request.url, response)
     end
-    {url, response}
-  end
-
-  defp delete_response(adapter, model, url_opts, request_opts, config) do
-    url = Config.get_request_url(config, model, url_opts)
-    headers = Config.get_headers(config)
-    {_, response} = adapter.delete(url, headers, request_opts)
-    if Config.log_responses?(config) do
-      ResponseLogger.log("PATCH", url, response)
-    end
-    {url, response}
+    {request, response}
   end
 end

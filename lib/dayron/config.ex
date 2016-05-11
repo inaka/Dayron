@@ -39,7 +39,7 @@ defmodule Dayron.Config do
   end
 
   @doc """
-  Returns the headers list set on application config
+  Returns the headers list as set in application config
   """
   def get_headers(config) do
     Keyword.get(config, :headers, [])
@@ -51,6 +51,18 @@ defmodule Dayron.Config do
   """
   def log_responses?(config) do
     Keyword.get(config, :enable_log, true)
+  end
+
+  @doc """
+  Returns a `%Dayron.Request` with provided data and application config
+  """
+  def init_request_data(config, method, model, opts \\ []) do
+    %Dayron.Request{
+      method: method,
+      url: get_request_url(config, model, opts),
+      body: opts[:body],
+      headers: get_headers(config)
+    }
   end
 
   @doc """
