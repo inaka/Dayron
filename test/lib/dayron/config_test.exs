@@ -43,9 +43,19 @@ defmodule Dayron.ConfigTest do
     assert adapter == Dayron.HTTPoisonAdapter
   end
 
-  test "returns default value for log_responses?" do
+  test "returns default value for get_logger?" do
     {_, _, config} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
-    assert Config.log_responses?(config)
+    assert Config.get_logger(config) == Dayron.BasicLogger
+  end
+
+  defmodule MyLogger do
+    
+  end
+
+  test "returns application logger config" do
+    Application.put_env(:dayron_test, Dayron.Repo, [url: "http://api.example.com", logger: MyLogger])
+    {_, _, config} = Config.parse(Dayron.Repo, otp_app: :dayron_test)
+    assert Config.get_logger(config) == MyLogger
   end
 
   defmodule MyModel do

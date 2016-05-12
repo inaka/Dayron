@@ -234,7 +234,7 @@ defmodule Dayron.Repo do
     {_request, response} =
       config
         |> Config.init_request_data(:get, model, id: id)
-        |> execute!(adapter, opts, config)
+        |> execute!(adapter, opts, Config.get_logger(config))
 
     case response do
       %Dayron.Response{status_code: 200, body: body} ->
@@ -249,7 +249,7 @@ defmodule Dayron.Repo do
     {request, response} =
       config
         |> Config.init_request_data(:get, model, id: id)
-        |> execute!(adapter, opts, config)
+        |> execute!(adapter, opts, Config.get_logger(config))
 
     case response do
       %Dayron.Response{status_code: 200, body: body} ->
@@ -264,7 +264,7 @@ defmodule Dayron.Repo do
     {_request, response} =
       config
         |> Config.init_request_data(:get, model)
-        |> execute!(adapter, opts, config)
+        |> execute!(adapter, opts, Config.get_logger(config))
 
     case response do
       %Dayron.Response{status_code: 200, body: body} ->
@@ -277,7 +277,7 @@ defmodule Dayron.Repo do
     {request, response} =
       config
         |> Config.init_request_data(:post, model, body: data)
-        |> execute!(adapter, opts, config)
+        |> execute!(adapter, opts, Config.get_logger(config))
 
     case response do
       %Dayron.Response{status_code: 201, body: body} ->
@@ -300,7 +300,7 @@ defmodule Dayron.Repo do
     {request, response} =
       config
         |> Config.init_request_data(:patch, model, data)
-        |> execute!(adapter, opts, config)
+        |> execute!(adapter, opts, Config.get_logger(config))
 
     case response do
       %Dayron.Response{status_code: 200, body: body} ->
@@ -328,7 +328,7 @@ defmodule Dayron.Repo do
     {request, response} =
       config
         |> Config.init_request_data(:delete, model, id: id)
-        |> execute!(adapter, opts, config)
+        |> execute!(adapter, opts, Config.get_logger(config))
 
     case response do
       %Dayron.Response{status_code: 200, body: body} ->
@@ -352,11 +352,11 @@ defmodule Dayron.Repo do
     end
   end
 
-  defp execute!(%Request{} = request, adapter, opts, config) do
+  defp execute!(%Request{} = request, adapter, opts, logger) do
     request
     |> Request.send(adapter, opts)
+    |> log_request(logger)
     |> handle_errors(opts)
-    |> log_response(config)
   end
 
   defp handle_errors({request, response}, _opts) do
@@ -371,10 +371,9 @@ defmodule Dayron.Repo do
     end
   end
 
-  defp log_response({request, response}, config) do
-    if Config.log_responses?(config) do
-      Logger.log(request.method, request.url, response)
-    end
+  defp log_request(data, nil), do: data
+  defp log_request({request, response}, logger) do
+    :ok = logger.log(request, response)    
     {request, response}
   end
 end

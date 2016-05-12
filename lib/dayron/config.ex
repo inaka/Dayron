@@ -49,8 +49,8 @@ defmodule Dayron.Config do
   Based on application configuration, returns a boolean indicating if reponses
   log is enabled
   """
-  def log_responses?(config) do
-    Keyword.get(config, :enable_log, true)
+  def get_logger(config) do
+    Keyword.get(config, :logger, Dayron.BasicLogger)
   end
 
   @doc """
