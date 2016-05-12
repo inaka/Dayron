@@ -53,7 +53,8 @@ defmodule Dayron.RepoTest do
   end
 
   test "`get!` raises an exception for not found resource" do
-    assert_raise Dayron.NoResultsError, fn ->
+    msg = ~r/expected at least one result/
+    assert_raise Dayron.NoResultsError, msg, fn ->
       TestRepo.get!(MyModel, "invalid-id")
     end
   end

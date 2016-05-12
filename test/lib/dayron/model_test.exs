@@ -69,4 +69,11 @@ defmodule Dayron.ModelTest do
       Model.from_json(MyInvalidModel, %{name: "Full Name"})
     end
   end
+
+  test "raises on protocol exception on from_json_list" do
+    msg = ~r/the given module is not a Dayron.Model/
+    assert_raise Protocol.UndefinedError, msg, fn -> 
+      Model.from_json_list(MyInvalidModel, [%{name: "Full Name"}])
+    end
+  end
 end

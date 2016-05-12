@@ -20,6 +20,18 @@ defmodule Dayron.HTTPoisonAdapterTest do
     assert body[:address] == %{street: "Elm Street", zipcode: "88888"}
   end
 
+  test "handles response body 'ok'", %{bypass: bypass, api_url: api_url} do
+    Bypass.expect bypass, fn conn ->
+      assert "/resources/id" == conn.request_path
+      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 200, "ok")
+    end
+    response = HTTPoisonAdapter.get("#{api_url}/resources/id")
+    assert {:ok, %Dayron.Response{status_code: 200, body: body}} = response
+    assert body == %{}
+  end
+
   test "returns a decoded body for a response list", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
