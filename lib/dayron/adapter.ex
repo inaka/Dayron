@@ -15,13 +15,12 @@ defmodule Dayron.Adapter do
         end
       end
   """
-  require HTTPoison
-  alias HTTPoison.Response
-  alias HTTPoison.Error
+  alias Dayron.Response
+  alias Dayron.ClientError
 
   @type headers :: [{binary, binary}] | %{binary => binary}
   @type body :: struct
-  @type response :: {:ok, Response.t} | {:error, Error.t}
+  @type response :: {:ok, Response.t} | {:error, ClientError.t}
 
   @doc """
   Issues a GET request to the given url. The headers param is an enumerable
