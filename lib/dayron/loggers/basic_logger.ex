@@ -40,7 +40,7 @@ defmodule Dayron.BasicLogger do
     method |> Atom.to_string |> String.upcase
   end
 
-  defp log_request_body(level, nil), do: :ok
+  defp log_request_body(_level, nil), do: :ok
   defp log_request_body(level, body) do
     if Enum.any?(body) do
       Logger.log level, fn ->

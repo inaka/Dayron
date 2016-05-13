@@ -2,13 +2,13 @@ defmodule Dayron.NoResultsError do
   @moduledoc """
   Raised at runtime when the request does not return any result.
   """
-  defexception [:url, :method]
+  defexception [:request]
 
-  def message(%{url: url, method: method}) do
+  def message(%{request: request}) do
     """
     expected at least one result but got none in request:
 
-    #{method} #{url}
+    #{inspect request}
     """
   end
 end
@@ -18,17 +18,17 @@ defmodule Dayron.ServerError do
   @moduledoc """
   Raised at runtime when the request returns an error.
   """
-  defexception [:url, :method, :body]
+  defexception [:request, :response]
 
-  def message(%{url: url, method: method, body: body}) do
+  def message(%{request: request, response: response}) do
     """
     unexpected response error in request:
 
-    #{method} #{url}
+    #{inspect request}
 
     * Server Error
 
-    #{inspect body}
+    #{inspect response}
     """
   end
 end
@@ -37,17 +37,15 @@ defmodule Dayron.ClientError do
   @moduledoc """
   Raised at runtime when the request connection fails.
   """
-  defexception [:id, :url, :method, :reason]
+  defexception [:id, :reason, :request]
 
-  def message(%{url: url, method: method, reason: reason}) do
+  def message(%{request: request, reason: reason}) do
     """
     unexpected client error in request:
 
-    #{method} #{url}
+    #{inspect request}
 
-    * Reason:
-
-    #{inspect reason}
+    * Reason: #{inspect reason}
     """
   end
 end
@@ -57,15 +55,15 @@ defmodule Dayron.ValidationError do
   @moduledoc """
   Raised at runtime when the response is a 422 unprocessable entity.
   """
-  defexception [:url, :method, :response]
+  defexception [:request, :response]
 
-  def message(%{url: url, method: method, response: response}) do
+  def message(%{request: request, response: response}) do
     """
     validation error in request:
 
-    #{method} #{url}
+    #{inspect request}
 
-    * Response (422):
+    * Response:
 
     #{inspect response}
     """

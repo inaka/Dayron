@@ -203,13 +203,17 @@ defmodule Dayron.RepoTest do
 
   test "`update` a valid resource fails when data is invalid" do
     data = %{name: nil, age: 30}
-    {:error, %{method: :patch, code: 422, response: response}} = TestRepo.update(MyModel, 'id', data)
-    assert response[:error] == "name is required"
+    {:error, %{request: request, response: response}} = TestRepo.update(MyModel, 'id', data)
+    assert request.method == :patch
+    assert response.status_code == 422
+    assert response.body[:error] == "name is required"
   end
 
   test "`update` an invalid resource returns an error" do
     data = %{name: "Full Name", age: 30}
-    assert {:error, %{method: :patch, code: 404}} = TestRepo.update(MyModel, 'invalid-id', data)
+    assert {:error, %{request: request, response: response}} = TestRepo.update(MyModel, 'invalid-id', data)
+    assert request.method == :patch
+    assert response.status_code == 404
   end
 
   test "`update` raises an exception on request error" do
