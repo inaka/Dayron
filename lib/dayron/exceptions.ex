@@ -37,7 +37,7 @@ defmodule Dayron.ClientError do
   @moduledoc """
   Raised at runtime when the request connection fails.
   """
-  defexception [:url, :method, :reason]
+  defexception [:id, :url, :method, :reason]
 
   def message(%{url: url, method: method, reason: reason}) do
     """

@@ -2,8 +2,9 @@ defmodule Dayron.Logger do
   @moduledoc """
   Helper module wrapping Logger calls to register request/response events
   """
-  require HTTPoison
   require Logger
+  alias Dayron.Response
+  alias Dayron.ClientError
 
   @doc """
   Logs a debug or error message based on response code.
@@ -16,7 +17,7 @@ defmodule Dayron.Logger do
   @doc """
   Logs a debug message for response codes between 200-399.
   """
-  def do_log(method, url, %HTTPoison.Response{status_code: code}, req_details) when code < 400 do
+  def do_log(method, url, %Response{status_code: code}, req_details) when code < 400 do
     Logger.debug [method, ?\s, url, ?\s, "-> #{code}"]
     log_request_details :debug, req_details
   end
@@ -24,7 +25,7 @@ defmodule Dayron.Logger do
   @doc """
   Logs an error message for error response codes, or greater than 400.
   """
-  def do_log(method, url, %HTTPoison.Response{status_code: code}, req_details) do
+  def do_log(method, url, %Response{status_code: code}, req_details) do
     Logger.error [method, ?\s, url, ?\s, "-> #{code}"]
     log_request_details :debug, req_details
   end
@@ -32,7 +33,7 @@ defmodule Dayron.Logger do
   @doc """
   Logs an error message for response error/exception.
   """
-  def do_log(method, url, %HTTPoison.Error{reason: reason}, req_details) do
+  def do_log(method, url, %ClientError{reason: reason}, req_details) do
     Logger.error [method, ?\s, url, ?\s, "-> #{reason}"]
     log_request_details :error, req_details
   end

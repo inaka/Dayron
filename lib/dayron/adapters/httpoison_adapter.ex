@@ -9,6 +9,7 @@ defmodule Dayron.HTTPoisonAdapter do
         url: "https://api.example.com"
   """
   @behaviour Dayron.Adapter
+  require HTTPoison
 
   defmodule Client do
     @moduledoc """
@@ -55,7 +56,7 @@ defmodule Dayron.HTTPoisonAdapter do
   """
   def get(url, headers \\ [], opts \\ []) do
     Client.start
-    Client.get(url, headers, opts)
+    Client.get(url, headers, opts) |> translate_response
   end
 
   @doc """
@@ -63,7 +64,7 @@ defmodule Dayron.HTTPoisonAdapter do
   """
   def post(url, body, headers \\ [], opts \\ []) do
     Client.start
-    Client.post(url, body, headers, opts)
+    Client.post(url, body, headers, opts) |> translate_response
   end
 
   @doc """
@@ -71,7 +72,7 @@ defmodule Dayron.HTTPoisonAdapter do
   """
   def patch(url, body, headers \\ [], opts \\ []) do
     Client.start
-    Client.patch(url, body, headers, opts)
+    Client.patch(url, body, headers, opts) |> translate_response
   end
 
   @doc """
@@ -79,6 +80,15 @@ defmodule Dayron.HTTPoisonAdapter do
   """
   def delete(url, headers \\ [], opts \\ []) do
     Client.start
-    Client.delete(url, headers, opts)
+    Client.delete(url, headers, opts) |> translate_response
+  end
+
+  defp translate_response({:ok, response}) do
+    data = response |> Map.from_struct
+    {:ok, struct(Dayron.Response, data)}
+  end
+  defp translate_response({:error, response}) do
+    data = response |> Map.from_struct
+    {:error, struct(Dayron.ClientError, data)}
   end
 end

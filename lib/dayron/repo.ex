@@ -231,54 +231,58 @@ defmodule Dayron.Repo do
 
   @doc false
   def get(adapter, model, id, opts, config) do
-    {_request, response} = config
-      |> Config.init_request_data(:get, model, id: id)
-      |> execute!(adapter, opts, config)
+    {_request, response} =
+      config
+        |> Config.init_request_data(:get, model, id: id)
+        |> execute!(adapter, opts, config)
 
     case response do
-      %HTTPoison.Response{status_code: 200, body: body} ->
+      %Dayron.Response{status_code: 200, body: body} ->
         Model.from_json(model, body)
-      %HTTPoison.Response{status_code: code} when code >= 300 and code < 500 ->
+      %Dayron.Response{status_code: code} when code >= 300 and code < 500 ->
         nil
     end
   end
 
   @doc false
   def get!(adapter, model, id, opts, config) do
-    {request, response} = config
-      |> Config.init_request_data(:get, model, id: id)
-      |> execute!(adapter, opts, config)
+    {request, response} =
+      config
+        |> Config.init_request_data(:get, model, id: id)
+        |> execute!(adapter, opts, config)
 
     case response do
-      %HTTPoison.Response{status_code: 200, body: body} ->
+      %Dayron.Response{status_code: 200, body: body} ->
         Model.from_json(model, body)
-      %HTTPoison.Response{status_code: code} when code >= 300 and code < 500 ->
+      %Dayron.Response{status_code: code} when code >= 300 and code < 500 ->
         raise Dayron.NoResultsError, method: request.method, url: request.url
     end
   end
 
   @doc false
   def all(adapter, model, opts, config) do
-    {_request, response} = config
-      |> Config.init_request_data(:get, model)
-      |> execute!(adapter, opts, config)
+    {_request, response} =
+      config
+        |> Config.init_request_data(:get, model)
+        |> execute!(adapter, opts, config)
 
     case response do
-      %HTTPoison.Response{status_code: 200, body: body} ->
+      %Dayron.Response{status_code: 200, body: body} ->
         Model.from_json_list(model, body)
     end
   end
 
   @doc false
   def insert(adapter, model, data, opts, config) do
-    {request, response} = config
-      |> Config.init_request_data(:post, model, body: data)
-      |> execute!(adapter, opts, config)
+    {request, response} =
+      config
+        |> Config.init_request_data(:post, model, body: data)
+        |> execute!(adapter, opts, config)
 
     case response do
-      %HTTPoison.Response{status_code: 201, body: body} ->
+      %Dayron.Response{status_code: 201, body: body} ->
         {:ok, Model.from_json(model, body)}
-      %HTTPoison.Response{status_code: 422, body: body} ->
+      %Dayron.Response{status_code: 422, body: body} ->
         {:error, %{method: request.method, url: request.url, response: body}}
     end
   end
@@ -293,14 +297,15 @@ defmodule Dayron.Repo do
 
   @doc false
   def update(adapter, model, data, opts, config) do
-    {request, response} = config
-      |> Config.init_request_data(:patch, model, data)
-      |> execute!(adapter, opts, config)
+    {request, response} =
+      config
+        |> Config.init_request_data(:patch, model, data)
+        |> execute!(adapter, opts, config)
 
     case response do
-      %HTTPoison.Response{status_code: 200, body: body} ->
+      %Dayron.Response{status_code: 200, body: body} ->
         {:ok, Model.from_json(model, body)}
-      %HTTPoison.Response{status_code: code, body: body}
+      %Dayron.Response{status_code: code, body: body}
       when code >= 400 and code < 500 ->
         {:error, %{method: request.method, code: code, url: request.url,
                    response: body}}
@@ -320,15 +325,16 @@ defmodule Dayron.Repo do
 
   @doc false
   def delete(adapter, model, id, opts, config) do
-    {request, response} = config
-      |> Config.init_request_data(:delete, model, id: id)
-      |> execute!(adapter, opts, config)
+    {request, response} =
+      config
+        |> Config.init_request_data(:delete, model, id: id)
+        |> execute!(adapter, opts, config)
 
     case response do
-      %HTTPoison.Response{status_code: 200, body: body} ->
+      %Dayron.Response{status_code: 200, body: body} ->
         {:ok, Model.from_json(model, body)}
-      %HTTPoison.Response{status_code: 204} -> {:ok, nil}
-      %HTTPoison.Response{status_code: code, body: body}
+      %Dayron.Response{status_code: 204} -> {:ok, nil}
+      %Dayron.Response{status_code: code, body: body}
       when code >= 400 and code < 500 ->
         {:error, %{method: request.method, code: code, url: request.url,
                    response: body}}
@@ -355,10 +361,10 @@ defmodule Dayron.Repo do
 
   defp handle_errors({request, response}, _opts) do
     case response do
-      %HTTPoison.Response{status_code: 500, body: body} ->
+      %Dayron.Response{status_code: 500, body: body} ->
         raise Dayron.ServerError, method: request.method, url: request.url,
                                   body: body
-      %HTTPoison.Error{reason: reason} -> :ok
+      %Dayron.ClientError{reason: reason} -> :ok
         raise Dayron.ClientError, method: request.method, url: request.url,
                                   reason: reason
       _ -> {request, response}
