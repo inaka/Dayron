@@ -8,7 +8,7 @@ defmodule Dayron.NoResultsError do
     """
     expected at least one result but got none in request:
 
-    #{inspect request}
+    #{inspect request, pretty: true}
     """
   end
 end
@@ -24,7 +24,7 @@ defmodule Dayron.ServerError do
     """
     unexpected response error in request:
 
-    #{inspect request}
+    #{inspect request, pretty: true}
 
     * Server Error
 
@@ -43,7 +43,7 @@ defmodule Dayron.ClientError do
     """
     unexpected client error in request:
 
-    #{inspect request}
+    #{inspect request, pretty: true}
 
     * Reason: #{inspect reason}
     """
@@ -61,7 +61,7 @@ defmodule Dayron.ValidationError do
     """
     validation error in request:
 
-    #{inspect request}
+    #{inspect request, pretty: true}
 
     * Response:
 
