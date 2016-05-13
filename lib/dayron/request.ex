@@ -27,7 +27,7 @@ end
 defimpl Inspect, for: Dayron.Request do
   @moduledoc """
   Implementing Inspect protocol for Dayron.Request
-  It changes the output for pretty:true options
+  It changes the output for pretty:true option
 
   ## Example:
 
@@ -70,6 +70,7 @@ defimpl Inspect, for: Dayron.Request do
       )
     ])
   end
+  def inspect(request, opts), do: Inspect.Any.inspect(request, opts)
 
   defp title(request) do
     glue method_to_string(request.method), request.url
@@ -80,6 +81,7 @@ defimpl Inspect, for: Dayron.Request do
     method |> Atom.to_string |> String.upcase
   end
 
+  defp list_to_doc(nil, _level), do: "-"
   defp list_to_doc([], _level), do: "-"
   defp list_to_doc(%{}, _level), do: "-"
   defp list_to_doc(list, level) do

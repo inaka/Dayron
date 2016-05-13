@@ -28,7 +28,7 @@ defmodule Dayron.ServerError do
 
     * Server Error
 
-    #{inspect response}
+    #{inspect response, pretty: true}
     """
   end
 end
@@ -65,7 +65,7 @@ defmodule Dayron.ValidationError do
 
     * Response:
 
-    #{inspect response}
+    #{inspect response, pretty: true}
     """
   end
 end

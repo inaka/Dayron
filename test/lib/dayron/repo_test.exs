@@ -19,7 +19,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`get` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.get(MyModel, "server-error")
     end
@@ -60,7 +60,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`get!` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.get!(MyModel, "server-error")
     end
@@ -104,7 +104,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`all` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.all(MyModel, [error: "server-error"])
     end
@@ -138,7 +138,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`insert` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.insert(MyModel, %{error: "server-error"})
     end
@@ -174,7 +174,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`insert!` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.insert!(MyModel, %{error: "server-error"})
     end
@@ -217,7 +217,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`update` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.update(MyModel, 'id', %{error: "server-error"})
     end
@@ -260,7 +260,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`update!` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.update!(MyModel, 'id', %{error: "server-error"})
     end
@@ -295,7 +295,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`delete` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.delete(MyModel, "server-error")
     end
@@ -342,7 +342,7 @@ defmodule Dayron.RepoTest do
   end
 
   test "`delete!` raises an exception on request error" do
-    msg = ~r/Internal Exception/
+    msg = ~r/unexpected response error/
     assert_raise Dayron.ServerError, msg, fn ->
       TestRepo.delete!(MyModel, "server-error")
     end

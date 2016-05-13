@@ -14,6 +14,11 @@ defmodule Dayron.RequestTest do
     assert response.status_code == 200
   end
 
+  test "implements a custom inspect", %{request: request} do
+    output = Kernel.inspect(request)
+    assert output =~ ~r/%Dayron\.Request\{.*\}/
+  end
+
   test "implements a custom inspect for pretty: true", %{request: request} do
     output = Kernel.inspect(request, pretty: true)
     assert output =~ ~r/GET http\:\/\/localhost\/resources/
