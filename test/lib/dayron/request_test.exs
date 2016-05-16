@@ -20,6 +20,12 @@ defmodule Dayron.RequestTest do
     assert output =~ ~r/%Dayron\.Request\{.*\}/
   end
 
+  test "inspect request when body is list", %{request: request} do
+    request = %{request | body: ["value1", "value2"]}
+    output = Kernel.inspect(request)
+    assert output =~ ~r/\[\"value1\", \"value2\"\]/
+  end
+
   test "implements a custom inspect for pretty: true", %{request: request} do
     output = Kernel.inspect(request, pretty: true)
     assert output =~ ~r/GET http\:\/\/localhost\/resources/
