@@ -11,6 +11,7 @@ defmodule Dayron.Config do
     otp_app = Keyword.fetch!(opts, :otp_app)
     config  = Application.get_env(otp_app, repo, [])
     adapter = opts[:adapter] || config[:adapter] || Dayron.HTTPoisonAdapter
+    logger = get_logger(config)
 
     case parse_url(opts[:url] || config[:url]) do
       {:ok, url} -> config = Keyword.put(config, :url, url)
@@ -22,7 +23,7 @@ defmodule Dayron.Config do
                              "config #{inspect otp_app}, #{inspect repo}"
     end
 
-    {otp_app, adapter, config}
+    {otp_app, adapter, logger, config}
   end
 
   @doc """
@@ -49,8 +50,8 @@ defmodule Dayron.Config do
   Based on application configuration, returns a boolean indicating if reponses
   log is enabled
   """
-  def log_responses?(config) do
-    Keyword.get(config, :enable_log, true)
+  def get_logger(config) do
+    Keyword.get(config, :logger, Dayron.BasicLogger)
   end
 
   @doc """
@@ -61,7 +62,8 @@ defmodule Dayron.Config do
       method: method,
       url: get_request_url(config, model, opts),
       body: opts[:body],
-      headers: get_headers(config)
+      headers: get_headers(config),
+      options: opts[:options]
     }
   end
 
