@@ -18,7 +18,7 @@ defimpl Inspect, for: Dayron.Response do
       Response: 200 in 200ms
   """
   import Inspect.Algebra
-  
+
   def inspect(response, %Inspect.Opts{pretty: true}) do
     concat([
       "Response: ",

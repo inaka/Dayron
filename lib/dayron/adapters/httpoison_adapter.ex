@@ -56,7 +56,7 @@ defmodule Dayron.HTTPoisonAdapter do
   """
   def get(url, headers \\ [], opts \\ []) do
     Client.start
-    Client.get(url, headers, opts) |> translate_response
+    url |> Client.get(headers, opts) |> translate_response
   end
 
   @doc """
@@ -64,7 +64,7 @@ defmodule Dayron.HTTPoisonAdapter do
   """
   def post(url, body, headers \\ [], opts \\ []) do
     Client.start
-    Client.post(url, body, headers, opts) |> translate_response
+    url |> Client.post(body, headers, opts) |> translate_response
   end
 
   @doc """
@@ -72,7 +72,7 @@ defmodule Dayron.HTTPoisonAdapter do
   """
   def patch(url, body, headers \\ [], opts \\ []) do
     Client.start
-    Client.patch(url, body, headers, opts) |> translate_response
+    url |> Client.patch(body, headers, opts) |> translate_response
   end
 
   @doc """
@@ -80,7 +80,7 @@ defmodule Dayron.HTTPoisonAdapter do
   """
   def delete(url, headers \\ [], opts \\ []) do
     Client.start
-    Client.delete(url, headers, opts) |> translate_response
+    url |> Client.delete(headers, opts) |> translate_response
   end
 
   defp translate_response({:ok, response}) do

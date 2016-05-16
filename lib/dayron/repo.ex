@@ -42,7 +42,7 @@ defmodule Dayron.Repo do
   alias Dayron.Config
   alias Dayron.Request
   alias Dayron.Response
-  
+
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
       alias Dayron.Repo
@@ -368,7 +368,7 @@ defmodule Dayron.Repo do
     case response do
       %Response{status_code: 500} ->
         raise Dayron.ServerError, request: request, response: response
-      %Dayron.ClientError{reason: reason} -> :ok
+      %Dayron.ClientError{reason: reason} ->
         raise Dayron.ClientError, request: request, reason: reason
       _ -> {request, response}
     end
@@ -376,7 +376,7 @@ defmodule Dayron.Repo do
 
   defp log_request(data, nil), do: data
   defp log_request({request, response}, logger) do
-    :ok = logger.log(request, response)    
+    :ok = logger.log(request, response)
     {request, response}
   end
 end

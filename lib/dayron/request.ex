@@ -93,17 +93,19 @@ defimpl Inspect, for: Dayron.Request do
   defp list_to_doc([], _level), do: "-"
   defp list_to_doc(%{}, _level), do: "-"
   defp list_to_doc(list, level) do
-    Enum.map(list, fn
+    list
+    |> Enum.map(fn
       {key, value} when is_list(value) ->
         nest(
           glue(
-            concat(Atom.to_string(key) |> String.capitalize, ":"),
+            concat(key |> Atom.to_string |> String.capitalize, ":"),
             list_to_doc(value, level + 1)
           ), @tab_width * level
         )
       {key, value} ->
         concat(Atom.to_string(key) <> "=", inspect(value))
       value -> inspect(value)
-    end) |> fold_doc(&glue(&1,&2))
+    end)
+    |> fold_doc(&glue(&1,&2))
   end
 end

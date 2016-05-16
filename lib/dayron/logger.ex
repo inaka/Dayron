@@ -8,7 +8,7 @@ defmodule Dayron.Logger do
 
       defmodule Dayron.CustomLogger do
         @behaviour Dayron.Logger
-        
+
         require Logger
 
         def log(request, response) do
