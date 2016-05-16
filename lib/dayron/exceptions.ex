@@ -26,9 +26,10 @@ defmodule Dayron.ServerError do
 
     #{inspect request, pretty: true}
 
-    * Server Error
-
     #{inspect response, pretty: true}
+
+    Response Body:
+    #{inspect response.body, pretty: true}
     """
   end
 end

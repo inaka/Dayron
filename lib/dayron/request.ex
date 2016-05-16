@@ -12,16 +12,24 @@ defmodule Dayron.Request do
   passing the correct parameters. Return a tuple with {request, response}.
   """
   def send(request, adapter) do
+    start = current_time
     opts = request.options
-    {_, response} = case request.method do
+    adapter_response = case request.method do
       :get -> adapter.get(request.url, request.headers, opts)
       :post -> adapter.post(request.url, request.body, request.headers, opts)
       :patch -> adapter.patch(request.url, request.body, request.headers, opts)
       :delete -> adapter.delete(request.url, request.headers, opts)
     end
 
-    {request, response}
+    {request, response_with_time(adapter_response, start)}
   end
+
+  defp response_with_time({:ok, response}, start) do
+    %{response | elapsed_time: time_diff(start, current_time)}
+  end
+  defp response_with_time({_, response}, _), do: response
+  defp current_time, do: :os.timestamp()
+  defp time_diff(start, stop), do: :timer.now_diff(stop, start)
 end
 
 defimpl Inspect, for: Dayron.Request do

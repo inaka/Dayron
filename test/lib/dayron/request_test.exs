@@ -12,6 +12,7 @@ defmodule Dayron.RequestTest do
   test "sends a request to adapter", %{request: request} do
     {_, response} = Request.send(request, Dayron.TestAdapter)
     assert response.status_code == 200
+    assert response.elapsed_time > 0
   end
 
   test "implements a custom inspect", %{request: request} do
