@@ -1,0 +1,8 @@
+<h2>Show post</h2>
+
+<ul>
+
+</ul>
+
+<%= link "Edit", to: post_path(@conn, :edit, @post) %>
+<%= link "Back", to: post_path(@conn, :index) %>

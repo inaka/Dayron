@@ -27,7 +27,11 @@ defmodule Dayron.HTTPoisonAdapter do
     def process_response_body("ok"), do: %{}
 
     def process_response_body(body) do
-      body |> Poison.decode! |> process_decoded_body
+      try do
+        body |> Poison.decode! |> process_decoded_body
+      rescue 
+        Poison.SyntaxError -> body
+      end
     end
 
     defp process_decoded_body(body) when is_list(body) do
@@ -38,16 +42,6 @@ defmodule Dayron.HTTPoisonAdapter do
       body
       |> Enum.into(%{})
       |> Crutches.Map.dkeys_update(fn (key) -> String.to_atom(key) end)
-    end
-
-    @doc """
-    Merges headers received as argument with default headers
-    """
-    def process_request_headers(headers) when is_list(headers) do
-      Enum.into(headers, [
-        {"Content-Type", "application/json"},
-        {"Accept", "application/json"},
-      ])
     end
   end
 
