@@ -360,8 +360,8 @@ defmodule Dayron.Repo do
   defp execute!(%Request{} = request, adapter, logger) do
     request
     |> Request.send(adapter)
-    |> log_request(logger)
     |> handle_errors
+    |> log_request(logger)
   end
 
   defp handle_errors({request, response}) do
