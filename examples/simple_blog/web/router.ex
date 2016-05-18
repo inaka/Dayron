@@ -16,7 +16,7 @@ defmodule SimpleBlog.Router do
   scope "/", SimpleBlog do
     pipe_through :browser # Use the default browser stack
 
-    get "/", PageController, :index
+    get "/", PostController, :index
     resources "/posts", PostController
   end
 

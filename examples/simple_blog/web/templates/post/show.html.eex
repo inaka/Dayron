@@ -1,8 +1,11 @@
-<h2>Show post</h2>
-
-<ul>
-
-</ul>
-
-<%= link "Edit", to: post_path(@conn, :edit, @post) %>
-<%= link "Back", to: post_path(@conn, :index) %>
+<article>
+  <header>
+    <h2><%= link @post.title, to: post_path(@conn, :show, @post) %></h2>
+  </header>
+  <p><%= @post.body %></p>
+  <footer>
+    Author ID: <%= @post.userId %>
+    <%= link "Edit", to: post_path(@conn, :edit, @post), class: "btn btn-default btn-xs" %>
+    <%= link "Delete", to: post_path(@conn, :delete, @post), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+  </footer>
+</article>

@@ -1,18 +1,14 @@
 defmodule SimpleBlog.PostTest do
-  use SimpleBlog.ModelCase
-
+  use SimpleBlog.ConnCase
   alias SimpleBlog.Post
 
-  @valid_attrs %{}
-  @invalid_attrs %{}
-
-  test "changeset with valid attributes" do
-    changeset = Post.changeset(%Post{}, @valid_attrs)
-    assert changeset.valid?
+  test "defines a post struct" do
+    post = struct(Post, %{title: "post title", body: "post body"})  
+    assert post.title == "post title"
+    assert post.body == "post body"
   end
 
-  test "changeset with invalid attributes" do
-    changeset = Post.changeset(%Post{}, @invalid_attrs)
-    refute changeset.valid?
+  test "implements the Dayron.Model resource" do
+    assert Post.__resource__ == "posts"
   end
 end

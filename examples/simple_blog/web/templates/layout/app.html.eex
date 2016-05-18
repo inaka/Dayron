@@ -14,12 +14,8 @@
   <body>
     <div class="container">
       <header class="header">
-        <nav role="navigation">
-          <ul class="nav nav-pills pull-right">
-            <li><a href="http://www.phoenixframework.org/docs">Get Started</a></li>
-          </ul>
-        </nav>
-        <span class="logo"></span>
+        <%= link "New Post", to: post_path(@conn, :new), class: "btn btn-primary pull-right" %>
+        <h1><a href="/" title="Home">Simple Blog</a></h1>
       </header>
 
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
