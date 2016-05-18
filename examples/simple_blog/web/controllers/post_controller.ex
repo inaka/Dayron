@@ -12,20 +12,17 @@ defmodule SimpleBlog.PostController do
   end
 
   def new(conn, _params) do
-    changeset = Post.changeset(%Post{})
-    render(conn, "new.html", changeset: changeset)
+    render(conn, "new.html", error: nil)
   end
 
   def create(conn, %{"post" => post_params}) do
-    changeset = Post.changeset(%Post{}, post_params)
-
-    case RestRepo.insert(changeset) do
+    case RestRepo.insert(Post, post_params) do
       {:ok, _post} ->
         conn
         |> put_flash(:info, "Post created successfully.")
         |> redirect(to: post_path(conn, :index))
-      {:error, changeset} ->
-        render(conn, "new.html", changeset: changeset)
+      {:error, error} ->
+        render(conn, "new.html", error: error)
     end
   end
 
@@ -36,33 +33,36 @@ defmodule SimpleBlog.PostController do
 
   def edit(conn, %{"id" => id}) do
     post = RestRepo.get!(Post, id)
-    changeset = Post.changeset(post)
-    render(conn, "edit.html", post: post, changeset: changeset)
+    conn = %{conn | params: %{"post" => stringify_keys(post) }}
+    render(conn, "edit.html", post: post, error: nil)
   end
 
   def update(conn, %{"id" => id, "post" => post_params}) do
     post = RestRepo.get!(Post, id)
-    changeset = Post.changeset(post, post_params)
-
-    case RestRepo.update(changeset) do
+    
+    case RestRepo.update(Post, id, post_params) do
       {:ok, post} ->
         conn
         |> put_flash(:info, "Post updated successfully.")
         |> redirect(to: post_path(conn, :show, post))
-      {:error, changeset} ->
-        render(conn, "edit.html", post: post, changeset: changeset)
+      {:error, error} ->
+        render(conn, "edit.html", post: post, error: error)
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    post = RestRepo.get!(Post, id)
-
-    # Here we use delete! (with a bang) because we expect
-    # it to always work (and if it does not, it will raise).
-    RestRepo.delete!(post)
+    RestRepo.delete!(Post, id)
 
     conn
     |> put_flash(:info, "Post deleted successfully.")
     |> redirect(to: post_path(conn, :index))
+  end
+
+  defp stringify_keys(post) do
+    post
+    |> Map.from_struct
+    |> Enum.reduce(%{}, fn ({key, val}, acc) -> 
+      Map.put(acc, Atom.to_string(key), val) 
+    end)
   end
 end
