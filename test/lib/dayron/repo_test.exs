@@ -133,8 +133,8 @@ defmodule Dayron.RepoTest do
 
   test "`insert` fails when creating a resource from an invalid model" do
     data = %{name: nil, age: 30}
-    {:error, %{method: :post, response: response}} = TestRepo.insert(MyModel, data)
-    assert response[:error] == "name is required"
+    {:error, %{response: response}} = TestRepo.insert(MyModel, data)
+    assert response.body[:error] == "name is required"
   end
 
   test "`insert` raises an exception on request error" do
@@ -287,11 +287,11 @@ defmodule Dayron.RepoTest do
   end
 
   test "`delete` a valid resource fails when server returns 422" do
-    assert {:error, %{method: :delete, code: 422}} = TestRepo.delete(MyModel, 'validation-error-id')
+    assert {:error, %{status_code: 422}} = TestRepo.delete(MyModel, 'validation-error-id')
   end
 
   test "`delete` an invalid resource returns an error" do
-    assert {:error, %{method: :delete, code: 404}} = TestRepo.delete(MyModel, 'invalid-id')
+    assert {:error, %{status_code: 404}} = TestRepo.delete(MyModel, 'invalid-id')
   end
 
   test "`delete` raises an exception on request error" do

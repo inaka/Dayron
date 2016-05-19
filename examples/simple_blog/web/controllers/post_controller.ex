@@ -21,8 +21,8 @@ defmodule SimpleBlog.PostController do
         conn
         |> put_flash(:info, "Post created successfully.")
         |> redirect(to: post_path(conn, :index))
-      {:error, error} ->
-        render(conn, "new.html", error: error)
+      {:error, %{response: response}} ->
+        render(conn, "new.html", error: response.body)
     end
   end
 
@@ -38,15 +38,14 @@ defmodule SimpleBlog.PostController do
   end
 
   def update(conn, %{"id" => id, "post" => post_params}) do
-    post = RestRepo.get!(Post, id)
-    
     case RestRepo.update(Post, id, post_params) do
       {:ok, post} ->
         conn
         |> put_flash(:info, "Post updated successfully.")
         |> redirect(to: post_path(conn, :show, post))
-      {:error, error} ->
-        render(conn, "edit.html", post: post, error: error)
+      {:error, %{response: response}} ->
+        post = RestRepo.get!(Post, id)
+        render(conn, "edit.html", post: post, error: response.body)
     end
   end
 

@@ -11,19 +11,24 @@ defmodule Dayron.Config do
     otp_app = Keyword.fetch!(opts, :otp_app)
     config  = Application.get_env(otp_app, repo, [])
     adapter = opts[:adapter] || config[:adapter] || Dayron.HTTPoisonAdapter
-    logger = get_logger(config)
+    logger = opts[:logger] || config[:logger] || Dayron.BasicLogger
 
-    case parse_url(opts[:url] || config[:url]) do
-      {:ok, url} -> config = Keyword.put(config, :url, url)
-      {:error, :missing_url} ->
-        raise ArgumentError, "missing :url configuration in " <>
-                             "config #{inspect otp_app}, #{inspect repo}"
-      {:error, _} ->
-        raise ArgumentError, "invalid URL for :url configuration in " <>
-                             "config #{inspect otp_app}, #{inspect repo}"
+    {otp_app, adapter, logger}
+  end
+
+  @doc """
+  Retrieves and normalizes the configuration for `repo` in `otp_app`.
+  """
+  def get(repo, otp_app) do
+    config = Application.get_env(otp_app, repo)
+    if config do
+      url = parse_url!(config, repo, otp_app)
+      Keyword.merge(config, url: url)
+    else
+      raise ArgumentError,
+        "configuration for #{inspect repo} not specified in" <>
+        " #{inspect otp_app} environment"
     end
-
-    {otp_app, adapter, logger, config}
   end
 
   @doc """
@@ -40,21 +45,6 @@ defmodule Dayron.Config do
   end
 
   @doc """
-  Returns the headers list as set in application config
-  """
-  def get_headers(config) do
-    Keyword.get(config, :headers, [])
-  end
-
-  @doc """
-  Based on application configuration, returns a boolean indicating if reponses
-  log is enabled
-  """
-  def get_logger(config) do
-    Keyword.get(config, :logger, Dayron.BasicLogger)
-  end
-
-  @doc """
   Returns a `%Dayron.Request` with provided data and application config
   """
   def init_request_data(config, method, model, opts \\ []) do
@@ -62,7 +52,7 @@ defmodule Dayron.Config do
       method: method,
       url: get_request_url(config, model, opts),
       body: opts[:body],
-      headers: get_headers(config),
+      headers: Keyword.get(config, :headers, []),
       options: opts[:options]
     }
   end
@@ -71,6 +61,17 @@ defmodule Dayron.Config do
   Parses the application configuration :url key, accepting system env or a
   binary
   """
+  def parse_url!(config, repo, otp_app) do
+    case parse_url(config[:url]) do
+      {:ok, url} -> url
+      {:error, :missing_url} ->
+        raise ArgumentError, "missing :url configuration in " <>
+                             "config #{inspect otp_app}, #{inspect repo}"
+      {:error, _} ->
+        raise ArgumentError, "invalid URL for :url configuration in " <>
+                             "config #{inspect otp_app}, #{inspect repo}"
+    end
+  end
   def parse_url({:system, env}) when is_binary(env) do
     parse_url(System.get_env(env) || "")
   end

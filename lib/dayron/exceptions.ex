@@ -2,7 +2,7 @@ defmodule Dayron.NoResultsError do
   @moduledoc """
   Raised at runtime when the request does not return any result.
   """
-  defexception [:request]
+  defexception plug_status: 404, request: nil
 
   def message(%{request: request}) do
     """
@@ -56,7 +56,7 @@ defmodule Dayron.ValidationError do
   @moduledoc """
   Raised at runtime when the response is a 422 unprocessable entity.
   """
-  defexception [:request, :response]
+  defexception plug_status: 400, request: nil, response: nil
 
   def message(%{request: request, response: response}) do
     """

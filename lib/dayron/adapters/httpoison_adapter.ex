@@ -29,7 +29,7 @@ defmodule Dayron.HTTPoisonAdapter do
     def process_response_body(body) do
       try do
         body |> Poison.decode! |> process_decoded_body
-      rescue 
+      rescue
         Poison.SyntaxError -> body
       end
     end

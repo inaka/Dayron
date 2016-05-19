@@ -9,7 +9,7 @@ defmodule Dayron.BasicLogger do
   @doc """
   Logs a debug message for response codes between 200-399.
   """
-  def log(request, %Response{status_code: code} = response) when code < 400 do
+  def log(request, %Response{status_code: code} = response) when code < 500 do
     do_log(:debug, request, response)
   end
 
