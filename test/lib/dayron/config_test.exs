@@ -36,6 +36,13 @@ defmodule Dayron.ConfigTest do
     assert config[:headers] == [access_token: "token"]
   end
 
+  test "raises an exception if no config is present" do
+    msg = "configuration for Dayron.Repo not specified in :invalid_app environment"
+    assert_raise ArgumentError, msg, fn ->
+      Config.get(Dayron.Repo, :invalid_app)
+    end
+  end  
+
   test "raises an exception if url is missing in config" do
     Application.put_env(:dayron_test, Dayron.Repo, [])
     msg = "missing :url configuration in config :dayron_test, Dayron.Repo"

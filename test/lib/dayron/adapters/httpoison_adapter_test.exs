@@ -30,6 +30,17 @@ defmodule Dayron.HTTPoisonAdapterTest do
     assert body == %{}
   end
 
+  test "handles invalid json body", %{bypass: bypass, api_url: api_url} do
+    Bypass.expect bypass, fn conn ->
+      assert "/resources/id" == conn.request_path
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 200, "{invalid_json=1}")
+    end
+    response = HTTPoisonAdapter.get("#{api_url}/resources/id")
+    assert {:ok, %Dayron.Response{status_code: 200, body: body}} = response
+    assert body == "{invalid_json=1}"
+  end
+
   test "returns a decoded body for a response list", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
