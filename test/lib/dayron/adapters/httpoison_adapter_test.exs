@@ -10,7 +10,6 @@ defmodule Dayron.HTTPoisonAdapterTest do
   test "returns a decoded body for a valid get request", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"name": "Full Name", "address":{"street": "Elm Street", "zipcode": "88888"}}>)
     end
@@ -23,7 +22,6 @@ defmodule Dayron.HTTPoisonAdapterTest do
   test "handles response body 'ok'", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, "ok")
     end
@@ -32,10 +30,20 @@ defmodule Dayron.HTTPoisonAdapterTest do
     assert body == %{}
   end
 
+  test "handles invalid json body", %{bypass: bypass, api_url: api_url} do
+    Bypass.expect bypass, fn conn ->
+      assert "/resources/id" == conn.request_path
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 200, "{invalid_json=1}")
+    end
+    response = HTTPoisonAdapter.get("#{api_url}/resources/id")
+    assert {:ok, %Dayron.Response{status_code: 200, body: body}} = response
+    assert body == "{invalid_json=1}"
+  end
+
   test "returns a decoded body for a response list", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
-      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, ~s<[{"name": "First Resource"}, {"name": "Second Resource"}]>)
     end
@@ -46,23 +54,22 @@ defmodule Dayron.HTTPoisonAdapterTest do
     assert second[:name] == "Second Resource"
   end
 
-  test "accepts query parameters", %{bypass: bypass, api_url: api_url} do
+  test "accepts query parameters and headers", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
       assert "q=qu+ery&page=2" == conn.query_string
-      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
+      assert [{"accept", "application/json"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, "")
     end
-    response = HTTPoisonAdapter.get("#{api_url}/resources", [], [params: [{:q, "qu ery"}, {:page, 2}]])
+    response = HTTPoisonAdapter.get("#{api_url}/resources", [{"accept", "application/json"}], [params: [{:q, "qu ery"}, {:page, 2}]])
     assert {:ok, %Dayron.Response{status_code: 200, body: _}} = response
   end
 
   test "accepts custom headers", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
-      assert [_a, _b, _c, {"accesstoken", "token"} | _] = conn.req_headers
+      assert [_a, _b, {"accesstoken", "token"} | _] = conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, "")
     end
@@ -98,11 +105,11 @@ defmodule Dayron.HTTPoisonAdapterTest do
   test "returns a decoded body for a valid post request", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
-      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
+      assert [{"accept", "application/json"} | _] = conn.req_headers
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 201, ~s<{"name": "Full Name", "age": 30}>)
     end
-    response = HTTPoisonAdapter.post("#{api_url}/resources", %{name: "Full Name", age: 30})
+    response = HTTPoisonAdapter.post("#{api_url}/resources", %{name: "Full Name", age: 30}, [{"accept", "application/json"}])
     assert {:ok, %Dayron.Response{status_code: 201, body: body}} = response
     assert body[:name] == "Full Name"
     assert body[:age] == 30
@@ -111,11 +118,11 @@ defmodule Dayron.HTTPoisonAdapterTest do
   test "returns a decoded body for a valid patch request", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
+      assert [{"accept", "application/json"} | _] = conn.req_headers
       assert "PATCH" == conn.method
       Plug.Conn.resp(conn, 200, ~s<{"name": "Full Name", "age": 30}>)
     end
-    response = HTTPoisonAdapter.patch("#{api_url}/resources/id", %{name: "Full Name", age: 30})
+    response = HTTPoisonAdapter.patch("#{api_url}/resources/id", %{name: "Full Name", age: 30}, [{"accept", "application/json"}])
     assert {:ok, %Dayron.Response{status_code: 200, body: body}} = response
     assert body[:name] == "Full Name"
     assert body[:age] == 30
@@ -124,11 +131,11 @@ defmodule Dayron.HTTPoisonAdapterTest do
   test "returns an empty body for a valid delete request", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      assert [{"accept", "application/json"}, {"content-type", "application/json"} | _] = conn.req_headers
+      assert [{"content-type", "application/json"}|_] = conn.req_headers
       assert "DELETE" == conn.method
       Plug.Conn.resp(conn, 204, "")
     end
-    response = HTTPoisonAdapter.delete("#{api_url}/resources/id")
+    response = HTTPoisonAdapter.delete("#{api_url}/resources/id", [{"content-type", "application/json"}])
     assert {:ok, %Dayron.Response{status_code: 204, body: nil}} = response
   end
 end

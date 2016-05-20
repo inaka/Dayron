@@ -47,52 +47,54 @@ defmodule Dayron.Repo do
     quote bind_quoted: [opts: opts] do
       alias Dayron.Repo
 
-      {otp_app, adapter, logger, config} = Config.parse(__MODULE__, opts)
+      {otp_app, adapter, logger} = Config.parse(__MODULE__, opts)
       @otp_app otp_app
       @adapter adapter
       @logger  logger
-      @config  config
+
+      def get_config, do: Config.get(__MODULE__, @otp_app)
 
       def get(model, id, opts \\ []) do
-        Repo.get(@adapter, model, [id: id, options: opts], @logger, @config)
+        Repo.get(@adapter, model, [id: id, options: opts], @logger, get_config)
       end
 
       def get!(model, id, opts \\ []) do
-        Repo.get!(@adapter, model, [id: id, options: opts], @logger, @config)
+        request_data = [id: id, options: opts]
+        Repo.get!(@adapter, model, request_data, @logger, get_config)
       end
 
       def all(model, opts \\ []) do
-        Repo.all(@adapter, model, [options: opts], @logger, @config)
+        Repo.all(@adapter, model, [options: opts], @logger, get_config)
       end
 
       def insert(model, data, opts \\ []) do
         request_data = [body: data, options: opts]
-        Repo.insert(@adapter, model, request_data, @logger, @config)
+        Repo.insert(@adapter, model, request_data, @logger, get_config)
       end
 
       def insert!(model, data, opts \\ []) do
         request_data = [body: data, options: opts]
-        Repo.insert!(@adapter, model, request_data, @logger, @config)
+        Repo.insert!(@adapter, model, request_data, @logger, get_config)
       end
 
       def update(model, id, data, opts \\ []) do
         request_data = [id: id, body: data, options: opts]
-        Repo.update(@adapter, model, request_data, @logger, @config)
+        Repo.update(@adapter, model, request_data, @logger, get_config)
       end
 
       def update!(model, id, data, opts \\ []) do
         request_data = [id: id, body: data, options: opts]
-        Repo.update!(@adapter, model, request_data, @logger, @config)
+        Repo.update!(@adapter, model, request_data, @logger, get_config)
       end
 
       def delete(model, id, opts \\ []) do
         request_data = [id: id, options: opts]
-        Repo.delete(@adapter, model, request_data, @logger, @config)
+        Repo.delete(@adapter, model, request_data, @logger, get_config)
       end
 
       def delete!(model, id, opts \\ []) do
         request_data = [id: id, options: opts]
-        Repo.delete!(@adapter, model, request_data, @logger, @config)
+        Repo.delete!(@adapter, model, request_data, @logger, get_config)
       end
     end
   end
@@ -289,8 +291,8 @@ defmodule Dayron.Repo do
     case response do
       %Response{status_code: 201, body: body} ->
         {:ok, Model.from_json(model, body)}
-      %Response{status_code: 422, body: body} ->
-        {:error, %{method: request.method, url: request.url, response: body}}
+      %Response{status_code: 422} ->
+        {:error, %{request: request, response: response}}
     end
   end
 
@@ -339,10 +341,8 @@ defmodule Dayron.Repo do
       %Response{status_code: 200, body: body} ->
         {:ok, Model.from_json(model, body)}
       %Response{status_code: 204} -> {:ok, nil}
-      %Response{status_code: code, body: body}
-      when code >= 400 and code < 500 ->
-        {:error, %{method: request.method, code: code, url: request.url,
-                   response: body}}
+      %Response{status_code: code} when code >= 400 ->
+        {:error, %{request: request, response: response, status_code: code}}
     end
   end
 
@@ -350,9 +350,9 @@ defmodule Dayron.Repo do
   def delete!(adapter, model, request_data, logger, config) do
     case delete(adapter, model, request_data, logger, config) do
       {:ok, model} -> {:ok, model}
-      {:error, %{code: 404} = error} ->
+      {:error, %{status_code: 404} = error} ->
         raise Dayron.NoResultsError, Map.to_list(error)
-      {:error, %{code: 422} = error} ->
+      {:error, %{status_code: 422} = error} ->
         raise Dayron.ValidationError, Map.to_list(error)
     end
   end
@@ -360,8 +360,8 @@ defmodule Dayron.Repo do
   defp execute!(%Request{} = request, adapter, logger) do
     request
     |> Request.send(adapter)
-    |> log_request(logger)
     |> handle_errors
+    |> log_request(logger)
   end
 
   defp handle_errors({request, response}) do
@@ -374,7 +374,6 @@ defmodule Dayron.Repo do
     end
   end
 
-  defp log_request(data, nil), do: data
   defp log_request({request, response}, logger) do
     :ok = logger.log(request, response)
     {request, response}

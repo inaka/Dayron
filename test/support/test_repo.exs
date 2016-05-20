@@ -106,7 +106,11 @@ defmodule Dayron.TestAdapter do
   end
 end
 
-Application.put_env(:dayron, Dayron.TestRepo, [url: "http://localhost", logger: nil])
+defmodule TestLogger do
+  def log(_request, _response), do: :ok
+end
+
+Application.put_env(:dayron, Dayron.TestRepo, [url: "http://localhost", logger: TestLogger])
 
 defmodule Dayron.TestRepo do
   use Dayron.Repo, otp_app: :dayron, adapter: Dayron.TestAdapter

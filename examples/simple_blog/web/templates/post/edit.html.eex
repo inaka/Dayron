@@ -1,0 +1,10 @@
+<h2>Edit post</h2>
+
+<%= form_for @conn, post_path(@conn, :update, @post), [as: :post], fn f -> %>
+  <%# hidden_input f, "_method", value: "patch" %>
+  <input name="_method" type="hidden" value="patch">
+  <%= render "form.html", f: f, error: @error %>
+<% end %>
+                        
+
+<%= link "Back", to: post_path(@conn, :index) %>

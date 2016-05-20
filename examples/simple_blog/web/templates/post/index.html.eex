@@ -1,0 +1,18 @@
+<section class="posts">
+  <%= for post <- @posts do %>
+    <article>
+      <header>
+        <h3><%= link post.title, to: post_path(@conn, :show, post) %></h3>
+      </header>
+      <p><%= post.body %></p>
+      <p class="read_more">
+        <%= link "Continue reading", to: post_path(@conn, :show, post) %>
+      </p>
+      <footer>
+        Author ID: <%= post.userId %>
+        <%= link "Edit", to: post_path(@conn, :edit, post), class: "btn btn-default btn-xs" %>
+        <%= link "Delete", to: post_path(@conn, :delete, post), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+      </footer>
+    </article>
+  <% end %>  
+</section>
