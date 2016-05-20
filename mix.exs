@@ -16,6 +16,7 @@ defmodule Dayron.Mixfile do
       source_url: "https://github.com/inaka/Dayron",
       homepage_url: "https://github.com/inaka/Dayron",
       description: description,
+      package: package,
       # Docs
       name: "Dayron",
       docs: [
@@ -56,7 +57,14 @@ defmodule Dayron.Mixfile do
 
   defp description do
     """
-    Dayron is a flexible library to interact with resources from REST APIs and map them to models in Elixir.
+    Dayron is a flexible library to interact with RESTful APIs and map resources to Elixir data structures.
     """
+  end
+
+  defp package do
+    [maintainers: ["Flávio Granero", "Alejandro Mataloni", "Marcos Almonacid"],
+     licenses: ["Apache 2.0"],
+     links: %{"GitHub" => "https://github.com/inaka/Dayron"},
+     files: ~w(mix.exs README.md CHANGELOG.md lib)]
   end
 end
