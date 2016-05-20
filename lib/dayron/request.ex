@@ -91,7 +91,8 @@ defimpl Inspect, for: Dayron.Request do
 
   defp list_to_doc(nil, _level), do: "-"
   defp list_to_doc([], _level), do: "-"
-  defp list_to_doc(%{}, _level), do: "-"
+  defp list_to_doc(value, _level) when is_binary(value), do: inspect(value)
+  defp list_to_doc(map = %{}, level), do: list_to_doc(Map.to_list(map), level)
   defp list_to_doc(list, level) do
     list
     |> Enum.map(fn
