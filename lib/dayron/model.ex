@@ -2,10 +2,29 @@ defmodule Dayron.Model do
   @moduledoc """
   Defines the functions to convert a module into a Dayron Model.
 
-  Given an module with Ecto.Schema included, the macro will include everything
-  required for Dayron.Repo and Dayron.Client to get and send data to the
-  external Rest Api. The Schema definition is required to convert the api
-  response json to a valid struct, mapping the json attributes to fields.
+  A Model provides a set of functionalities around mapping the external data
+  into local structures.
+
+  In order to convert an Elixir module into a Model, Dayron provides a
+  `Dayron.Model` mixin, that requires a `resource` option and a struct
+  defining the available fields.
+
+  ## Example
+
+      defmodule User do
+        use Dayron.Model, resource: "users"
+
+        defstruct name: "", age: 0
+      end
+
+  The `resource` option value defines the complete API URL when requesting
+  this model. For the above example, api calls will be made to
+  http://YOUR_API_URL/users.
+
+  Given an module with Ecto.Schema already included, the `Dayron.Model` mixin
+  will include everything required for Dayron.Repo to get and send data to the
+  external Rest Api. The `schema` will be used to map external api responses
+  data to local structs.
 
   ## Example
 
@@ -19,9 +38,9 @@ defmodule Dayron.Model do
         end
       end
 
-  By default the resource name is defined based on the schema source name, in
-  the above example "users", to api calls will be made to http://YOUR_API_URL/
-  users. In order to replace this, a :resource option is available.
+  In that case, resource name is defined based on the schema source name, or
+  "users" in the above example. To replace the value, inform a `resource`
+  option when including the mixin.
 
   ## Example
 
@@ -37,6 +56,17 @@ defmodule Dayron.Model do
 
   If some pre-processing is required to convert the json data into the struct,
   it's possible to override __from_json__/2 into the module.
+
+  ## Example
+
+      def __from_json__(data, _options) do
+        updated_data =
+          data
+          |> Map.get(:details)
+          |> Map.delete(:type)
+        struct(__MODULE__, updated_data)
+      end
+
   """
   alias Dayron.Requestable
 
