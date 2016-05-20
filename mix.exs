@@ -13,13 +13,13 @@ defmodule Dayron.Mixfile do
       test_coverage: [tool: ExCoveralls],
       deps: deps,
       # Hex
-      source_url: "https://github.com/inaka/Dayron",
-      homepage_url: "https://github.com/inaka/Dayron",
       description: description,
       package: package,
       # Docs
       name: "Dayron",
       docs: [
+        source_ref: "v#{@version}", main: "Dayron",
+        source_url: "https://github.com/inaka/Dayron",
         extras: ["README.md"]
       ]
     ]
@@ -65,6 +65,9 @@ defmodule Dayron.Mixfile do
     [maintainers: ["Flávio Granero", "Alejandro Mataloni", "Marcos Almonacid"],
      licenses: ["Apache 2.0"],
      links: %{"GitHub" => "https://github.com/inaka/Dayron"},
-     files: ~w(mix.exs README.md CHANGELOG.md lib)]
+     files: ~w(mix.exs README.md CHANGELOG.md lib),
+     links: %{
+        "GitHub" => "https://github.com/inaka/Dayron",
+        "Docs" => "http://hexdocs.pm/dayron/"}]
   end
 end
