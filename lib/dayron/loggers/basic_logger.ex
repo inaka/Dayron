@@ -7,14 +7,14 @@ defmodule Dayron.BasicLogger do
   alias Dayron.ClientError
 
   @doc """
-  Logs a debug message for response codes between 200-399.
+  Logs a debug message for response codes between 200-499.
   """
   def log(request, %Response{status_code: code} = response) when code < 500 do
     do_log(:debug, request, response)
   end
 
   @doc """
-  Logs an error message for error response codes, or greater than 400.
+  Logs an error message for error response codes, greater than or equal 500.
   """
   def log(request, %Response{} = response), do:
     do_log(:error, request, response)
