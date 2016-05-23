@@ -134,7 +134,7 @@ You can also create your own adapter implementing the [Dyron.Adapter](https://gi
 
 ## Important links
 
-  * [Online Documentation](http://hexdocs.pm/Dayron)
+  * [Online Documentation](http://hexdocs.pm/dayron)
   * [Examples](https://github.com/inaka/Dayron/tree/master/examples)
 
 ## Contributing
