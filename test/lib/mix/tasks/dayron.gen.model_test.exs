@@ -61,4 +61,22 @@ defmodule Mix.Tasks.Phoenix.Gen.ModelTest do
     end
   end
 
+  test "raises when invalid attributes are provided" do
+    assert_raise Mix.Error, "Unknown type `foo` given to generator", fn ->
+      Mix.Tasks.Dayron.Gen.Model.run ["User", "users", "name:foo"]
+    end
+  end
+
+  test "raises with help when invalid args are provided" do
+    assert_raise Mix.Error, ~r/mix dayron.gen.model expects both the model name and the resource path/, fn ->
+      Mix.Tasks.Dayron.Gen.Model.run ["User", "name:string"]
+    end
+  end
+
+  test "raises with help when no args are provided" do
+    assert_raise Mix.Error, ~r/mix dayron.gen.model expects both the model name and the resource path/, fn ->
+      Mix.Tasks.Dayron.Gen.Model.run []
+    end
+  end
+
 end
