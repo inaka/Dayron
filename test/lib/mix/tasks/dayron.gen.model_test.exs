@@ -1,6 +1,8 @@
+Code.require_file "../../../support/mix_helper.exs", __DIR__
+
 defmodule Mix.Tasks.Phoenix.Gen.ModelTest do
   use ExUnit.Case
-  import MixHelper
+  import Dayron.MixHelper
 
   setup do
     Mix.Task.clear
