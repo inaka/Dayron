@@ -91,7 +91,7 @@ After defining the configuration and model, you are allowed to retrieve data fro
 
     alias MyApp.User
     alias MyApp.RestRepo
-    
+
     def index(conn, params)
       conn
       |> assign(:users, RestRepo.all(User))
@@ -105,6 +105,35 @@ After defining the configuration and model, you are allowed to retrieve data fro
       end
     end
   ```
+
+## Generating modules
+
+You can generate Dayron modules using the task `dayron.gen.model`
+
+`mix dayron.gen.model User users name age:integer`
+
+The first argument is the module name followed by the resource path. The generated model will contain:
+
+* a model file in lib/your_app/models
+* a test file in test/your_app/models
+
+Both the model and the test path can be configured using the Dayron ```generators```
+config.
+
+```elixir
+config :dayron, :generators,
+  models_path: "web/models",
+  models_test_path: "test/models"
+```
+
+The model fields are given using `name:type` syntax
+where types can be one of the following:
+
+    :array, :integer, :float, :boolean, :string
+
+Omitting the type makes it default to `:string`
+
+
 
 ## Extra Configuration
 
