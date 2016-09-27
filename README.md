@@ -193,7 +193,7 @@ For **questions** or **general comments** regarding the use of this library, ple
 
 If you find any **bugs** or have a **problem** while using this library, please [open an issue](https://github.com/inaka/Dayron/issues/new) in this repo (or a pull request).
 
-You can also check all of our open-source projects at [inaka.github.io](inaka.github.io).
+You can also check all of our open-source projects at [inaka.github.io](https://inaka.github.io).
 
 ## Copyright and License
 
