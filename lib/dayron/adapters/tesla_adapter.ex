@@ -31,7 +31,11 @@ defmodule Dayron.TeslaAdapter do
   """
   def get(url, headers \\ [], opts \\ []) do
     query = Keyword.get(opts, :params, [])
-    Client.get(url, headers: headers, query: query) |> translate_response
+    try do
+      Client.get(url, headers: headers, query: query) |> translate_response
+    rescue
+      e in Tesla.Error -> translate_error(e)
+    end
   end
 
   @doc """
@@ -77,4 +81,7 @@ defmodule Dayron.TeslaAdapter do
     end
   end
 
+  defp translate_error(%Tesla.Error{reason: reason}) do
+    {:error, %Dayron.ClientError{reason: reason}}
+  end
 end

@@ -97,7 +97,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert {:ok, %Dayron.Response{status_code: 500, body: _}} = response
   end
 
-  @tag skip: "TBD"
   test "returns an error for invalid server" do
     response = TeslaAdapter.get("http://localhost:0001/resources/error")
     assert {:error, %Dayron.ClientError{reason: :econnrefused}} = response
