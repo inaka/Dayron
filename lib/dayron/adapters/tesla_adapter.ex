@@ -30,7 +30,8 @@ defmodule Dayron.TeslaAdapter do
   Implementation for `Dayron.Adapter.get/3`.
   """
   def get(url, headers \\ [], opts \\ []) do
-    Client.get(url, headers: headers) |> translate_response
+    query = Keyword.get(opts, :params, [])
+    Client.get(url, headers: headers, query: query) |> translate_response
   end
 
   @doc """

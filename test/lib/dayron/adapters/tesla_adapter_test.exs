@@ -54,7 +54,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert second[:name] == "Second Resource"
   end
 
-  @tag skip: "TBD"
   test "accepts query parameters and headers", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
