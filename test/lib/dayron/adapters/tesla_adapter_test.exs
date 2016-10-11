@@ -19,7 +19,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert body[:address] == %{street: "Elm Street", zipcode: "88888"}
   end
 
-  @tag skip: "TBD"
   test "handles response body 'ok'", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
@@ -31,7 +30,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert body == %{}
   end
 
-  @tag skip: "TBD"
   test "handles invalid json body", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
@@ -43,7 +41,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert body == "{invalid_json=1}"
   end
 
-  @tag skip: "TBD"
   test "returns a decoded body for a response list", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path

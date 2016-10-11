@@ -18,6 +18,11 @@ defmodule Dayron.TeslaAdapter do
     """
     use Tesla
 
+    # TODO: If the Tesla JSON decoding was a bit more flexible, properly
+    # returning errors along with raw output and perhaps allowing a force
+    # flag to ignore content-type header contents, we could use that instead
+    # of our own custom decoding. Perhaps a pull request would do it..
+
     adapter Tesla.Adapter.Hackney
   end
 
@@ -62,6 +67,7 @@ defmodule Dayron.TeslaAdapter do
     {:error, struct(Dayron.ClientError, data)}
   end
 
+  defp translate_response_body("ok"), do: %{}
   defp translate_response_body(body) do
     try do
       body |> Poison.decode!(keys: :atoms)
