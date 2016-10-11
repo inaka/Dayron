@@ -77,7 +77,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert {:ok, %Dayron.Response{status_code: 200, body: _}} = response
   end
 
-  @tag skip: "TBD"
   test "returns a 404 response", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/invalid" == conn.request_path
@@ -88,7 +87,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert {:ok, %Dayron.Response{status_code: 404, body: _}} = response
   end
 
-  @tag skip: "TBD"
   test "returns a 500 error response", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/server-error" == conn.request_path
