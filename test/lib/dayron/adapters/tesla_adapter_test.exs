@@ -115,7 +115,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert body[:age] == 30
   end
 
-  @tag skip: "TBD"
   test "returns a decoded body for a valid patch request", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
