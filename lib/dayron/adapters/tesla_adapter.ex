@@ -22,6 +22,7 @@ defmodule Dayron.TeslaAdapter do
     # returning errors along with raw output and perhaps allowing a force
     # flag to ignore content-type header contents, we could use that instead
     # of our own custom decoding. Perhaps a pull request would do it..
+    plug Tesla.Middleware.EncodeJson, engine: Poison
 
     adapter Tesla.Adapter.Hackney
   end
@@ -32,7 +33,7 @@ defmodule Dayron.TeslaAdapter do
   def get(url, headers \\ [], opts \\ []) do
     query = Keyword.get(opts, :params, [])
     try do
-      Client.get(url, headers: headers, query: query) |> translate_response
+      Client.get(url, headers: Enum.into(headers, %{}), query: query) |> translate_response
     rescue
       e in Tesla.Error -> translate_error(e)
     end
@@ -42,21 +43,21 @@ defmodule Dayron.TeslaAdapter do
   Implementation for `Dayron.Adapter.post/4`.
   """
   def post(url, body, headers \\ [], opts \\ []) do
-    Client.post(url, body, headers: headers) |> translate_response
+    Client.post(url, body, headers: Enum.into(headers, %{})) |> translate_response
   end
 
   @doc """
   Implementation for `Dayron.Adapter.patch/4`.
   """
   def patch(url, body, headers \\ [], opts \\ []) do
-    Client.patch(url, body, headers: headers) |> translate_response
+    Client.patch(url, body, headers: Enum.into(headers, %{})) |> translate_response
   end
 
   @doc """
   Implementation for `Dayron.Adapter.delete/3`.
   """
   def delete(url, headers \\ [], opts \\ []) do
-    Client.delete(url, headers: headers) |> translate_response
+    Client.delete(url, headers: Enum.into(headers, %{})) |> translate_response
   end
 
   defp translate_response(%Tesla.Env{} = response) do

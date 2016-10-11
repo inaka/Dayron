@@ -102,7 +102,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert {:error, %Dayron.ClientError{reason: :econnrefused}} = response
   end
 
-  @tag skip: "TBD"
   test "returns a decoded body for a valid post request", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources" == conn.request_path
