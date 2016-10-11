@@ -66,11 +66,10 @@ defmodule Dayron.TeslaAdapterTest do
     assert {:ok, %Dayron.Response{status_code: 200, body: _}} = response
   end
 
-  @tag skip: "TBD"
   test "accepts custom headers", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
-      assert [_a, _b, {"accesstoken", "token"} | _] = conn.req_headers
+      assert {"accesstoken", "token"} in conn.req_headers
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, "")
     end
