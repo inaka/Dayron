@@ -15,8 +15,8 @@ defmodule Dayron.TeslaAdapterTest do
     end
     response = TeslaAdapter.get("#{api_url}/resources/id")
     assert {:ok, %Dayron.Response{status_code: 200, body: body}} = response
-    assert body["name"] == "Full Name"
-    assert body["address"] == %{"street" => "Elm Street", "zipcode" => "88888"}
+    assert body[:name] == "Full Name"
+    assert body[:address] == %{street: "Elm Street", zipcode: "88888"}
   end
 
   @tag skip: "TBD"

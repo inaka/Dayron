@@ -18,8 +18,6 @@ defmodule Dayron.TeslaAdapter do
     """
     use Tesla
 
-    plug Tesla.Middleware.JSON
-
     adapter Tesla.Adapter.Hackney
   end
 
@@ -54,7 +52,7 @@ defmodule Dayron.TeslaAdapter do
   defp translate_response(%Tesla.Env{} = response) do
     {:ok, %Dayron.Response{
         status_code: response.status,
-        body: response.body |> Poison.decode! |> IO.inspect,
+        body: translate_response_body(response.body),
         headers: response.headers |> Map.to_list
       }
     }
@@ -63,4 +61,13 @@ defmodule Dayron.TeslaAdapter do
     data = response |> Map.from_struct
     {:error, struct(Dayron.ClientError, data)}
   end
+
+  defp translate_response_body(body) do
+    try do
+      body |> Poison.decode!(keys: :atoms)
+    rescue
+      Poison.SyntaxError -> body
+    end
+  end
+
 end
