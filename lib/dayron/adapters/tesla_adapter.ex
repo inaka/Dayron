@@ -73,6 +73,7 @@ defmodule Dayron.TeslaAdapter do
     {:error, struct(Dayron.ClientError, data)}
   end
 
+  defp translate_response_body(""), do: nil
   defp translate_response_body("ok"), do: %{}
   defp translate_response_body(body) do
     try do

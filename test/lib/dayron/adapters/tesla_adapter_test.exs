@@ -128,7 +128,6 @@ defmodule Dayron.TeslaAdapterTest do
     assert body[:age] == 30
   end
 
-  @tag skip: "TBD"
   test "returns an empty body for a valid delete request", %{bypass: bypass, api_url: api_url} do
     Bypass.expect bypass, fn conn ->
       assert "/resources/id" == conn.request_path
