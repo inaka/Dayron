@@ -7,6 +7,11 @@ defmodule Dayron.TeslaAdapter do
       config :my_app, MyApp.Repo,
         adapter: Dayron.TeslaAdapter,
         url: "https://api.example.com"
+
+  ## TODO
+
+  - Handle options to the Tesla client, see `Dayron.Adapter`
+  - Check test coverage
   """
   @behaviour Dayron.Adapter
 
@@ -18,10 +23,6 @@ defmodule Dayron.TeslaAdapter do
     """
     use Tesla
 
-    # TODO: If the Tesla JSON decoding was a bit more flexible, properly
-    # returning errors along with raw output and perhaps allowing a force
-    # flag to ignore content-type header contents, we could use that instead
-    # of our own custom decoding. Perhaps a pull request would do it..
     plug Tesla.Middleware.EncodeJson, engine: Poison
     plug Dayron.TeslaAdapter.Translator
 
@@ -32,6 +33,12 @@ defmodule Dayron.TeslaAdapter do
     @moduledoc """
     A Tesla Middleware implementation, translating responses to the format
     expected by Dayron.
+
+    We're also doing JSON decoding of responses here, as the built-in JSON
+    middleware in Tesla will only decode content-type `application/json`, as
+    well as raise an error on decoding issues instead of returning the raw
+    input. Both of these differences break the existing implicit contract, as
+    implemented by `Dayron.HTTPoisonAdapter`.
     """
     def call(env, next, opts \\ []) do
       env
