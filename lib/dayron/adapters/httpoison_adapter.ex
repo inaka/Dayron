@@ -17,7 +17,6 @@ defmodule Dayron.HTTPoisonAdapter do
     json responses to Maps or a List of Maps. Maps keys are also converted to
     atoms by default.
     """
-    require Crutches
     require Poison
     use HTTPoison.Base
 
@@ -28,20 +27,10 @@ defmodule Dayron.HTTPoisonAdapter do
 
     def process_response_body(body) do
       try do
-        body |> Poison.decode! |> process_decoded_body
+        body |> Poison.decode!(keys: :atoms)
       rescue
         Poison.SyntaxError -> body
       end
-    end
-
-    defp process_decoded_body(body) when is_list(body) do
-      body |> Enum.map(&process_decoded_body(&1))
-    end
-
-    defp process_decoded_body(body) do
-      body
-      |> Enum.into(%{})
-      |> Crutches.Map.dkeys_update(fn (key) -> String.to_atom(key) end)
     end
   end
 
