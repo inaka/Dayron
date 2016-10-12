@@ -48,8 +48,7 @@ defmodule Dayron.TeslaAdapter do
       }
     end
     defp translate_response({:error, response}) do
-      data = response |> Map.from_struct
-      {:error, struct(Dayron.ClientError, data)}
+      translate_error(response)
     end
 
     defp translate_response_body(""), do: nil
@@ -61,6 +60,11 @@ defmodule Dayron.TeslaAdapter do
         Poison.SyntaxError -> body
       end
     end
+
+    def translate_error(%Tesla.Error{} = error) do
+      data = error |> Map.from_struct
+      {:error, struct(Dayron.ClientError, data)}
+    end
   end
 
   @doc """
@@ -68,36 +72,35 @@ defmodule Dayron.TeslaAdapter do
   """
   def get(url, headers \\ [], opts \\ []) do
     query = Keyword.get(opts, :params, [])
-    # TODO: Implement try..catch for remaining functions?
-    try do
-      Client.get(url, headers: Enum.into(headers, %{}), query: query)
-    rescue
-      e in Tesla.Error -> translate_error(e)
-    end
+    tesla_call(:get, [url, [headers: Enum.into(headers, %{}), query: query]])
   end
 
   @doc """
   Implementation for `Dayron.Adapter.post/4`.
   """
   def post(url, body, headers \\ [], opts \\ []) do
-    Client.post(url, body, headers: Enum.into(headers, %{}))
+    tesla_call(:post, [url, body, [headers: Enum.into(headers, %{})]])
   end
 
   @doc """
   Implementation for `Dayron.Adapter.patch/4`.
   """
   def patch(url, body, headers \\ [], opts \\ []) do
-    Client.patch(url, body, headers: Enum.into(headers, %{}))
+    tesla_call(:patch, [url, body, [headers: Enum.into(headers, %{})]])
   end
 
   @doc """
   Implementation for `Dayron.Adapter.delete/3`.
   """
   def delete(url, headers \\ [], opts \\ []) do
-    Client.delete(url, headers: Enum.into(headers, %{}))
+    tesla_call(:delete, [url, [headers: Enum.into(headers, %{})]])
   end
 
-  defp translate_error(%Tesla.Error{reason: reason}) do
-    {:error, %Dayron.ClientError{reason: reason}}
+  defp tesla_call(method, args) do
+    try do
+      apply(Client, method, args)
+    rescue
+      e in Tesla.Error -> Translator.translate_error(e)
+    end
   end
 end
