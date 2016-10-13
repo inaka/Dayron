@@ -11,7 +11,6 @@ defmodule Dayron.TeslaAdapter do
   ## TODO
 
   - Handle options to the Tesla client, see `Dayron.Adapter`
-  - Check test coverage
   """
   @behaviour Dayron.Adapter
 
@@ -53,9 +52,6 @@ defmodule Dayron.TeslaAdapter do
           headers: response.headers |> Map.to_list
         }
       }
-    end
-    defp translate_response({:error, response}) do
-      translate_error(response)
     end
 
     defp translate_response_body(""), do: nil
