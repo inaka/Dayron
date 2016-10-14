@@ -10,7 +10,7 @@ defmodule Dayron.TeslaAdapter do
 
   ## TODO
 
-  - Handle options to the Tesla client, see `Dayron.Adapter`
+  - Handle streaming
   """
   @behaviour Dayron.Adapter
 
@@ -39,7 +39,7 @@ defmodule Dayron.TeslaAdapter do
     input. Both of these differences break the existing implicit contract, as
     implemented by `Dayron.HTTPoisonAdapter`.
     """
-    def call(env, next, opts \\ []) do
+    def call(env, next, _opts) do
       env
       |> Tesla.run(next)
       |> translate_response()
@@ -74,29 +74,28 @@ defmodule Dayron.TeslaAdapter do
   Implementation for `Dayron.Adapter.get/3`.
   """
   def get(url, headers \\ [], opts \\ []) do
-    query = Keyword.get(opts, :params, [])
-    tesla_call(:get, [url, [headers: Enum.into(headers, %{}), query: query]])
+    tesla_call(:get, [url, build_options(headers, opts)])
   end
 
   @doc """
   Implementation for `Dayron.Adapter.post/4`.
   """
   def post(url, body, headers \\ [], opts \\ []) do
-    tesla_call(:post, [url, body, [headers: Enum.into(headers, %{})]])
+    tesla_call(:post, [url, body, build_options(headers, opts)])
   end
 
   @doc """
   Implementation for `Dayron.Adapter.patch/4`.
   """
   def patch(url, body, headers \\ [], opts \\ []) do
-    tesla_call(:patch, [url, body, [headers: Enum.into(headers, %{})]])
+    tesla_call(:patch, [url, body, build_options(headers, opts)])
   end
 
   @doc """
   Implementation for `Dayron.Adapter.delete/3`.
   """
   def delete(url, headers \\ [], opts \\ []) do
-    tesla_call(:delete, [url, [headers: Enum.into(headers, %{})]])
+    tesla_call(:delete, [url, build_options(headers, opts)])
   end
 
   defp tesla_call(method, args) do
@@ -105,5 +104,33 @@ defmodule Dayron.TeslaAdapter do
     rescue
       e in Tesla.Error -> Translator.translate_error(e)
     end
+  end
+
+  def build_options([], opts), do: build_options(opts)
+  def build_options(headers, opts) do
+    build_options([{:headers, Enum.into(headers, %{})} | opts])
+  end
+
+  defp build_options(opts) do
+    Enum.reduce(opts, [{:opts, build_hackney_options(opts)}], fn
+      {:headers, value}, options -> [{:headers, value} | options]
+      {:params, value}, options -> [{:query, value} | options]
+    end)
+  end
+
+  defp build_hackney_options(opts) do
+    Enum.reduce(opts, [], fn
+      {:hackney, extra_opts}, hn_opts    -> hn_opts ++ extra_opts
+      {:timeout, value}, hn_opts         -> [{:connect_timeout, value} | hn_opts]
+      {:recv_timeout, value}, hn_opts    -> [{:recv_timeout, value} | hn_opts]
+      {:proxy, value}, hn_opts           -> [{:proxy, value} | hn_opts]
+      {:proxy_auth, value}, hn_opts      -> [{:proxy_auth, value} | hn_opts]
+      {:ssl, value}, hn_opts             -> [{:ssl_options, value} | hn_opts]
+      {:follow_redirect, value}, hn_opts -> [{:follow_redirect, value} | hn_opts]
+      {:max_redirect, value}, hn_opts    -> [{:max_redirect, value} | hn_opts]
+      #{:stream_to, arg}, hn_opts ->
+      #  [:async, {:stream_to, spawn(module, :transformer, [arg])} | hn_opts]
+      _other, hn_opts -> hn_opts
+    end)
   end
 end
