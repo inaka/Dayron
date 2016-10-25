@@ -115,6 +115,7 @@ defmodule Dayron.TeslaAdapter do
     Enum.reduce(opts, [{:opts, build_hackney_options(opts)}], fn
       {:headers, value}, options -> [{:headers, value} | options]
       {:params, value}, options -> [{:query, value} | options]
+      _, options -> options
     end)
   end
 

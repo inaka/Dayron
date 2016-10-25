@@ -138,4 +138,24 @@ defmodule Dayron.TeslaAdapterTest do
     response = TeslaAdapter.delete("#{api_url}/resources/id", [{"content-type", "application/json"}])
     assert {:ok, %Dayron.Response{status_code: 204, body: nil}} = response
   end
+
+  test "passing a custom hackney option works", %{bypass: bypass, api_url: api_url} do
+    Bypass.expect bypass, fn conn ->
+      case conn.request_path do
+        "/old" ->
+          conn
+          |> Plug.Conn.put_resp_header("location", "/new")
+          |> Plug.Conn.resp(301, "You are being redirected.")
+          |> Plug.Conn.halt
+        "/new" ->
+          Plug.Conn.resp(conn, 200, "bar")
+      end
+    end
+    response = TeslaAdapter.post("#{api_url}/old", "foo", [], [
+      {:follow_redirect, true},
+      {:hackney, [{:force_redirect, true}]}
+    ])
+    assert {:ok, %Dayron.Response{status_code: 200, body: body}} = response
+    assert body == "bar"
+  end
 end
