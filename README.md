@@ -150,7 +150,11 @@ Using the configuration you're allowed to set headers that will be sent on every
 
 ### HTTP Client Adapter
 
-Currently the only adapter available is [HTTPoisonAdapter](https://github.com/inaka/Dayron/blob/master/lib/dayron/adapters/httpoison_adapter.ex), which uses [HTTPoison](https://github.com/edgurgel/httpoison) and [hackney](https://github.com/benoitc/hackney) to manage HTTP requests.
+Currently the adapters available are:
+- [HTTPoisonAdapter](https://github.com/inaka/Dayron/blob/master/lib/dayron/adapters/httpoison_adapter.ex), which uses [HTTPoison](https://github.com/edgurgel/httpoison) and [hackney](https://github.com/benoitc/hackney) to manage HTTP requests
+- [TeslaAdapter](https://github.com/inaka/Dayron/blob/master/lib/dayron/adapters/tesla_adapter.ex), which uses [Tesla](https://github.com/teamon/tesla) and [hackney](https://github.com/benoitc/hackney) to manage HTTP requests
+
+**NOTE:** While the HTTPoison adapter accepts the `:stream_to` argument and passes it on to HTTPoison, streaming isn't very well supported yet as it's not handled by the adapter in a generic way. The Tesla adapter currently ignores the option. See [discussion in issue #54](https://github.com/inaka/Dayron/issues/54#issuecomment-253715077).
 
 You can also create your own adapter implementing the [Dyron.Adapter](https://github.com/inaka/Dayron/blob/master/lib/dayron/adapter.ex) behavior, and changing the configuration to something like:
 
