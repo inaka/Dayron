@@ -93,7 +93,7 @@ defmodule Dayron.Model do
 
       def __from_json_list__(data, _opts), do: struct(__MODULE__, data)
 
-      defoverridable [__url_for__: 1, __from_json__: 2]
+      defoverridable [__url_for__: 1, __from_json__: 2, __from_json_list__: 2]
     end
   end
 
