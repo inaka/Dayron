@@ -189,8 +189,6 @@ Create a branch with the issue name and once you're ready (new additions and tes
 
 ## Contact Us
 
-For **questions** or **general comments** regarding the use of this library, please use our public [hipchat room](http://inaka.net/hipchat).
-
 If you find any **bugs** or have a **problem** while using this library, please [open an issue](https://github.com/inaka/Dayron/issues/new) in this repo (or a pull request).
 
 You can also check all of our open-source projects at [inaka.github.io](https://inaka.github.io).
