@@ -29,7 +29,7 @@ defmodule Dayron.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison, :crutches]]
+    [applications: [:logger, :httpoison]]
   end
 
   # Dependencies can be Hex packages:
@@ -45,7 +45,6 @@ defmodule Dayron.Mixfile do
     [
       {:poison,       "~> 1.5 or ~> 2.0"},
       {:httpoison,    "~> 0.8.0"},
-      {:crutches,     "~> 1.0.0"},
       {:credo,        "~> 0.3",     only: [:dev, :test]},
       {:bypass,       "~> 0.1",     only: :test},
       {:excoveralls,  "~> 0.5",     only: :test},
