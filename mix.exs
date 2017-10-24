@@ -45,6 +45,7 @@ defmodule Dayron.Mixfile do
     [
       {:poison,       "~> 1.5 or ~> 2.0"},
       {:httpoison,    "~> 0.8.0"},
+      {:tesla,        "~> 0.5.0", optional: true},
       {:crutches,     "~> 1.0.0"},
       {:credo,        "~> 0.3",     only: [:dev, :test]},
       {:bypass,       "~> 0.1",     only: :test},
